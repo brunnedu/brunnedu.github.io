@@ -1,0 +1,84 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environments
+env/
+venv/
+ENV/
+VENV/
+.pip/
+.venv/
+
+# Common Python virtual environment files
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Byte-compiled, optimized, or DLL files
+*.pyc
+
+# Hidden files (common in Unix)
+.*.swp
+.svn/
+.hg/
+
+# Logs and databases
+*.log
+*.sqlite
+
+# Unit test / coverage results
+.coverage
+*.cover
+.hypothesis/
+.tox/
+.pytest_cache/
+
+# Packages
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# JetBrains IDE files (e.g., PyCharm)
+.idea/
+
+# VSCode IDE files
+.vscode/
+
+# GitHub actions
+.github/
+
+# Data files
+*.csv
+*.h5
+*.json
+*.db
+
+# Ignore Jupyter notebook metadata
+*/.ipynb_checkpoints/*
+
+# Ignore model files
+*.h5
+*.pkl
+*.model
+*.joblib
+
+# Ignore matplotlib figure images
+*.png
+
+# Ignore environment config files
+.env
+.envrc
+
