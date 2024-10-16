@@ -1,7 +1,7 @@
 # Data Scientist
 
 **[MSc Computer Science @ ETH Zürich](https://ethz.ch/en.html)**  
-**Specializing in Machine Intelligence & Data Management**
+**Machine Intelligence & Data Management**
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue)](https://www.linkedin.com/in/dustinbrunner) 
 [![GitHub](https://img.shields.io/badge/GitHub-Profile-black)](https://github.com/brunnedu)
