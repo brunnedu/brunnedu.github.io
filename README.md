@@ -42,17 +42,18 @@ I’m a Master's student in Computer Science at ETH Zürich, specializing in **M
 I have practical experience in data engineering, machine learning, and forecasting, including contributions to the **Darts forecasting library** and developing tools for industries such as logistics and energy.
 
 Feel free to connect if you’re interested in collaborating! I’m eager to explore new challenges, particularly in **Data Science**, **Quantitative Finance**, or **Big Data Engineering** roles.
-<p align="center">
-  <a href="https://www.linkedin.com/in/dustinbrunner" target="_blank" style="margin: 0 15px;">
-    <img src="assets/img/linkedin_favicon.png" alt="LinkedIn" width="40" height="40"/>
+<div style="text-align: left;">
+  <a href="https://www.linkedin.com/in/dustinbrunner" target="_blank" style="margin: 0 10px;">
+    <img src="assets/img/linkedin_favicon.png" alt="LinkedIn" width="35" height="35"/>
   </a>
-  <a href="https://github.com/brunnedu" target="_blank" style="margin: 0 15px;">
-    <img src="assets/img/github_favicon.png" alt="GitHub" width="40" height="40"/>
+  <a href="https://github.com/brunnedu" target="_blank" style="margin: 0 10px;">
+    <img src="assets/img/github_favicon.png" alt="GitHub" width="35" height="35"/>
   </a>
-  <a href="https://scholar.google.com/citations?user=G4x3x_0AAAAJ" target="_blank" style="margin: 0 15px;">
-    <img src="assets/img/google_scholar_favicon.png" alt="Google Scholar" width="40" height="40"/>
+  <a href="https://scholar.google.com/citations?user=G4x3x_0AAAAJ" target="_blank" style="margin: 0 10px;">
+    <img src="assets/img/google_scholar_favicon.png" alt="Google Scholar" width="35" height="35"/>
   </a>
-</p>
+</div>
+
 
 ---
 
@@ -101,12 +102,16 @@ being adopted in Smartvote’s redesign for the next elections.
 
 **Technologies**: Python, Pandas, D-Tale, SciPy, Optuna, Plotly, LaTex, Notion
 
+![RSFP](assets/img/rsfp.png)
+
 ### DataComp Challenge
 *Semester Project* (Sep 2023 - Dec 2023) | [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 
 Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal is to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
 
 **Technologies**: Python, PyTorch Lightning, SLURM (Cluster), CLIP (Contrastive Language-Image Pretraining)
+
+![DataComp Workflow](assets/img/datacomp_workflow.png)
 
 ### BasketXplainer
 *Interactive ML Project* (Feb 2023 - Jul 2023) | [Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://gitlab.inf.ethz.ch/course-xai-iml23/b5-winning-in-basketball)  
@@ -116,7 +121,7 @@ Developed an interactive dashboard to predict basketball game outcomes based on 
 **Technologies**: Python, scikit-learn, SHAP, Flask, Javascript, React, Gitlab Pipelines
 
 ### Darts Forecasting Library
-*Open-Source Contributor* (Sep 2021 - Aug 2022) | [Documentation](https://unit8co.github.io/darts/) | [GitHub](https://github.com/unit8co/darts)  
+*Open-Source Contributor* (Sep 2021 - Aug 2022) | [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
 
 Core contributor to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by vectorizing computations achieving a speedup of up to 400x.  
 
@@ -135,6 +140,13 @@ Developed a model that enables constant-time approximate shortest path distance
 queries on road networks, achieving an average mean relative error of less than 10%.  
 
 **Technologies**: Python, PyTorch Geometric, (Hyperbolic) Graph Convolutional Networks ((H)GCNs)
+
+<div style="display: flex; justify-content: space-between; width: 100%;">
+  <img src="assets/img/winterthur.png" alt="Winterthur" style="flex: 1; max-width: 25%; height: auto;"/>
+  <img src="assets/img/surat.png" alt="Surat" style="flex: 1; max-width: 25%; height: auto;"/>
+  <img src="assets/img/dongguan.png" alt="Dongguan" style="flex: 1; max-width: 25%; height: auto;"/>
+  <img src="assets/img/new_york.png" alt="New York" style="flex: 1; max-width: 25%; height: auto;"/>
+</div>
 
 ---
 
