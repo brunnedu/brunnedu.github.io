@@ -60,25 +60,3 @@ build/
 # GitHub actions
 .github/
 
-# Data files
-*.csv
-*.h5
-*.json
-*.db
-
-# Ignore Jupyter notebook metadata
-*/.ipynb_checkpoints/*
-
-# Ignore model files
-*.h5
-*.pkl
-*.model
-*.joblib
-
-# Ignore matplotlib figure images
-*.png
-
-# Ignore environment config files
-.env
-.envrc
-

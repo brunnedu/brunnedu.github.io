@@ -3,26 +3,37 @@
 **[MSc Computer Science @ ETH Zürich](https://ethz.ch/en.html)**  
 **Machine Intelligence & Data Management**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue)](https://www.linkedin.com/in/dustinbrunner) 
-[![GitHub](https://img.shields.io/badge/GitHub-Profile-black)](https://github.com/brunnedu)
+[//]: # (---)
 
----
+[//]: # ()
+[//]: # (## Overview)
 
-## Overview
-- [Hey There!](#hey-there)
-- [Skills](#skills)
-- [Education](#education)
-- [Experience](#experience)
-- [Projects](#projects)
-  - [Recommender Systems for Swiss Politics](#recommender-systems-for-swiss-politics)
-  - [DataComp Challenge](#datacomp-challenge)
-  - [BasketXplainer](#basketxplainer)
-  - [Darts Forecasting Library](#darts-forecasting-library)
-  - [Distance-Preserving Graph Embedding](#distance-preserving-graph-embedding)
-- [Achievements](#achievements)
-- [Hobbies](#hobbies)
+[//]: # (- [Hey There!]&#40;#hey-there&#41;)
 
----
+[//]: # (- [Skills]&#40;#skills&#41;)
+
+[//]: # (- [Education]&#40;#education&#41;)
+
+[//]: # (- [Experience]&#40;#experience&#41;)
+
+[//]: # (- [Projects]&#40;#projects&#41;)
+
+[//]: # (  - [Recommender Systems for Swiss Politics]&#40;#recommender-systems-for-swiss-politics&#41;)
+
+[//]: # (  - [DataComp Challenge]&#40;#datacomp-challenge&#41;)
+
+[//]: # (  - [BasketXplainer]&#40;#basketxplainer&#41;)
+
+[//]: # (  - [Darts Forecasting Library]&#40;#darts-forecasting-library&#41;)
+
+[//]: # (  - [Distance-Preserving Graph Embedding]&#40;#distance-preserving-graph-embedding&#41;)
+
+[//]: # (- [Achievements]&#40;#achievements&#41;)
+
+[//]: # (- [Hobbies]&#40;#hobbies&#41;)
+
+[//]: # ()
+[//]: # (---)
 
 ## Hey There!
 
