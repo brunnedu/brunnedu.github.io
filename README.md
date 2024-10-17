@@ -1,6 +1,6 @@
 # Data Scientist
 
-**[MSc Computer Science @ ETH Zürich](https://ethz.ch/en.html)**  
+**[MSc Computer Science @ ETH Zürich](https://inf.ethz.ch/)**  
 **Machine Intelligence & Data Management**
 
 [//]: # (---)
@@ -41,15 +41,16 @@ I’m a Master's student in Computer Science at ETH Zürich, specializing in **M
 
 I have practical experience in data engineering, machine learning, and forecasting, including contributions to the **Darts forecasting library** and developing tools for industries such as logistics and energy.
 
-Feel free to connect if you’re interested in collaborating! I’m eager to explore new challenges, particularly in **Data Science**, **Quantitative Finance**, or **Big Data Engineering** roles.
-<div style="text-align: left;">
-  <a href="https://www.linkedin.com/in/dustinbrunner" target="_blank" style="margin: 0 5px;">
+Feel free to **connect** if you’re interested in collaborating! I’m eager to explore new challenges, particularly in **Data Science**, **Quantitative Finance**, or **Big Data Engineering** roles.
+
+<div style="text-align: left; margin-bottom: 20px;">
+  <a href="https://www.linkedin.com/in/dustinbrunner" target="_blank" style="margin: 0 10px;"> <!-- Adjusted margin for better spacing -->
     <img src="assets/img/linkedin_favicon.png" alt="LinkedIn" width="30" height="30"/>
   </a>
-  <a href="https://github.com/brunnedu" target="_blank" style="margin: 0 5px;">
+  <a href="https://github.com/brunnedu" target="_blank" style="margin: 0 10px;">
     <img src="assets/img/github_favicon.png" alt="GitHub" width="30" height="30"/>
   </a>
-  <a href="https://scholar.google.com/citations?user=G4x3x_0AAAAJ" target="_blank" style="margin: 0 5px;">
+  <a href="https://scholar.google.com/citations?user=G4x3x_0AAAAJ" target="_blank" style="margin: 0 10px;">
     <img src="assets/img/google_scholar_favicon.png" alt="Google Scholar" width="30" height="30"/>
   </a>
 </div>
