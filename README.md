@@ -92,7 +92,8 @@ Feel free to connect if you’re interested in collaborating! I’m eager to exp
 ## Projects
 
 ### Recommender Systems for Swiss Politics
-*Master’s Thesis* (Feb 2024 - Aug 2024) | Paper _(confidential - under submission)_  
+*Master’s Thesis* (Feb 2024 - Aug 2024)  
+Paper _(confidential - under submission)_  
 
 Identified 11 vulnerabilities in **Smartvote**, a Swiss voting advice application, with
 some allowing for more than 3.5x visibility gains for individual parties. Proposed 10
@@ -104,7 +105,8 @@ being adopted in Smartvote’s redesign for the next elections.
 ![RSFP](assets/img/rsfp.png)
 
 ### DataComp Challenge
-*Semester Project* (Sep 2023 - Dec 2023) | [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
+*Semester Project* (Sep 2023 - Dec 2023)  
+[Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 
 Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal is to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
 
@@ -113,14 +115,16 @@ Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML b
 ![DataComp Workflow](assets/img/datacomp_workflow.png)
 
 ### BasketXplainer
-*Interactive ML Project* (Feb 2023 - Jul 2023) | [Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://gitlab.inf.ethz.ch/course-xai-iml23/b5-winning-in-basketball)  
+*Interactive ML Project* (Feb 2023 - Jul 2023)  
+[Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://gitlab.inf.ethz.ch/course-xai-iml23/b5-winning-in-basketball)  
 
 Developed an interactive dashboard to predict basketball game outcomes based on in-game stats and explain predictions using SHAP values. Users could modify team statistics to explore **what-if scenarios**.  
 
 **Technologies**: Python, scikit-learn, SHAP, Flask, Javascript, React, Gitlab Pipelines
 
 ### Darts Forecasting Library
-*Open-Source Contributor* (Sep 2021 - Aug 2022) | [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
+*Open-Source Contributor* (Sep 2021 - Aug 2022)  
+[Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
 
 Core contributor to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by vectorizing computations achieving a speedup of up to 400x.  
 
@@ -133,7 +137,8 @@ pip install darts
 [//]: # (<img src="assets/img/darts_logo.png" alt="Darts Logo" width="200"/>)
 
 ### Distance Preserving Graph Embedding
-*Bachelor’s Thesis* (Feb 2021 - Aug 2021) | [Report](https://pub.tik.ee.ethz.ch/students/2021-FS/BA-2021-17.pdf)  
+*Bachelor’s Thesis* (Feb 2021 - Aug 2021)  
+[Report](https://pub.tik.ee.ethz.ch/students/2021-FS/BA-2021-17.pdf)  
 
 Developed a model that enables constant-time approximate shortest path distance
 queries on road networks, achieving an average mean relative error of less than 10%.  
