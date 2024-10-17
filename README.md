@@ -54,11 +54,9 @@ Feel free to connect if you’re interested in collaborating! I’m eager to exp
   </a>
 </div>
 
----
-
 ## Skills
 
-- **Languages**: Python, C++, Java, R, Typescript
+- **Programming Languages**: Python, R, C++, Java, Typescript
 - **Frameworks & Libraries**: PyTorch, NumPy, Pandas, Optuna, Plotly, Hugging Face, tidyverse
 - **Data Management**: SQL, Spark, Hadoop, HBase, MongoDB, Neo4j
 - **Other**: Git, Docker, Bash, MLOps, CI/CD, GitHub Actions, Notion, Jira
@@ -93,16 +91,16 @@ Feel free to connect if you’re interested in collaborating! I’m eager to exp
 
 ### Recommender Systems for Swiss Politics
 *Master’s Thesis* (Feb 2024 - Aug 2024)  
-Paper _(confidential - under submission)_  
+Paper _(confidential - under submission)_ | [Smartvote](https://www.smartvote.ch/)
 
-Identified 11 vulnerabilities in **Smartvote**, a Swiss voting advice application, with
+Identified 11 vulnerabilities in the swiss voting advice application **Smartvote** with
 some allowing for more than 3.5x visibility gains for individual parties. Proposed 10
-mitigations that significantly reduce or eliminate these vulnerabilities. Findings are
+mitigations to significantly reduce or eliminate these vulnerabilities. Findings are
 being adopted in Smartvote’s redesign for the next elections.  
 
 **Technologies**: Python, Pandas, D-Tale, SciPy, Optuna, Plotly, LaTex, Notion
 
-![RSFP](assets/img/rsfp.png)
+![RSFP Manipulation](assets/img/rsfp_manipulation.png)
 
 ### DataComp Challenge
 *Semester Project* (Sep 2023 - Dec 2023)  
@@ -122,6 +120,8 @@ Developed an interactive dashboard to predict basketball game outcomes based on 
 
 **Technologies**: Python, scikit-learn, SHAP, Flask, Javascript, React, Gitlab Pipelines
 
+![BasketXplainer Prediction](assets/img/basketxplainer_prediction.png)
+
 ### Darts Forecasting Library
 *Open-Source Contributor* (Sep 2021 - Aug 2022)  
 [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
@@ -133,8 +133,7 @@ Core contributor to the open-source time series forecasting library Darts by Uni
 pip install darts
 ```
 
-[//]: # (![Darts Logo]&#40;assets/img/darts_logo.png&#41;)
-[//]: # (<img src="assets/img/darts_logo.png" alt="Darts Logo" width="200"/>)
+![Darts Logo](assets/img/darts.png)
 
 ### Distance Preserving Graph Embedding
 *Bachelor’s Thesis* (Feb 2021 - Aug 2021)  
@@ -143,13 +142,21 @@ pip install darts
 Developed a model that enables constant-time approximate shortest path distance
 queries on road networks, achieving an average mean relative error of less than 10%.  
 
-**Technologies**: Python, PyTorch Geometric, (Hyperbolic) Graph Convolutional Networks ((H)GCNs)
+**Technologies**: Python, NetworkX, PyTorch Geometric, (Hyperbolic) Graph Convolutional Networks ((H)GCNs)
 
-<div style="display: flex; justify-content: space-between; width: 100%;">
-  <img src="assets/img/winterthur.png" alt="Winterthur" style="flex: 1; max-width: 25%; height: auto;"/>
-  <img src="assets/img/surat.png" alt="Surat" style="flex: 1; max-width: 25%; height: auto;"/>
-  <img src="assets/img/dongguan.png" alt="Dongguan" style="flex: 1; max-width: 25%; height: auto;"/>
-  <img src="assets/img/new_york.png" alt="New York" style="flex: 1; max-width: 25%; height: auto;"/>
+<div style="display: flex; justify-content: space-between; width: 100%; margin: 0;">
+  <figure style="flex: 1; text-align: center; margin: 0; padding: 10px;">
+    <img src="assets/img/winterthur.png" alt="Winterthur" style="max-width: 100%; height: auto;"/>
+    <figcaption style="margin-top: 5px;">Winterthur, Switzerland</figcaption>
+  </figure>
+  <figure style="flex: 1; text-align: center; margin: 0; padding: 10px;">
+    <img src="assets/img/surat.png" alt="Surat" style="max-width: 100%; height: auto;"/>
+    <figcaption style="margin-top: 5px;">Surat, India</figcaption>
+  </figure>
+  <figure style="flex: 1; text-align: center; margin: 0; padding: 10px;">
+    <img src="assets/img/dongguan.png" alt="Dongguan" style="max-width: 100%; height: auto;"/>
+    <figcaption style="margin-top: 5px;">Dongguan, China</figcaption>
+  </figure>
 </div>
 
 ---
