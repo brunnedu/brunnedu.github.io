@@ -20,6 +20,7 @@
   - [Darts Forecasting Library](#darts-forecasting-library)
   - [Distance-Preserving Graph Embedding](#distance-preserving-graph-embedding)
 - [Achievements](#achievements)
+- [Hobbies](#hobbies)
 
 ---
 
@@ -79,7 +80,7 @@ Feel free to connect if you’re interested in collaborating! I’m eager to exp
 
 ## Projects
 
-### Recommender Systems for Swiss Politics  
+### Recommender Systems for Swiss Politics
 *Master’s Thesis* (Feb 2024 - Aug 2024) | Paper _(confidential - under submission)_  
 Identified 11 vulnerabilities in **Smartvote**, a Swiss voting advice application, with
 some allowing for more than 3.5x visibility gains for individual parties. Proposed 10
@@ -87,7 +88,7 @@ mitigations that significantly reduce or eliminate these vulnerabilities. Findin
 being adopted in Smartvote’s redesign for the next elections.  
 **Technologies**: Python, Pandas, D-Tale, SciPy, Optuna, Plotly, LaTex, Notion
 
-### DataComp Challenge  
+### DataComp Challenge
 *Semester Project* (Sep 2023 - Dec 2023) | [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal is to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
 **Technologies**: Python, PyTorch Lightning, SLURM (Cluster), CLIP (Contrastive Language-Image Pretraining)
@@ -108,7 +109,7 @@ pip install darts
 ![Darts Logo](assets/img/darts_logo.png)
 <img src="assets/img/darts_logo.png" alt="Darts Logo" width="200"/>
 
-### Distance Preserving Graph Embedding  
+### Distance Preserving Graph Embedding
 *Bachelor’s Thesis* (Feb 2021 - Aug 2021) | [Report](https://pub.tik.ee.ethz.ch/students/2021-FS/BA-2021-17.pdf)  
 Developed a model that enables constant-time approximate shortest path distance
 queries on road networks, achieving an average mean relative error of less than 10%.  
