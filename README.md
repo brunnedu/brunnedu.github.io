@@ -116,7 +116,7 @@ Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML b
 
 ### BasketXplainer
 *Interactive ML Project* (Feb 2023 - Jul 2023)  
-[Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://gitlab.inf.ethz.ch/course-xai-iml23/b5-winning-in-basketball)  
+[Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitLab](https://gitlab.inf.ethz.ch/course-xai-iml23/b5-winning-in-basketball)  
 
 Developed an interactive dashboard to predict basketball game outcomes based on in-game stats and explain predictions using SHAP values. Users could modify team statistics to explore **what-if scenarios**.  
 
