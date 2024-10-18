@@ -1,7 +1,18 @@
 title: Dustin Brunner
-description: MSc Computer Science @ ETH Zürich | Data Science
+description: MSc CS @ ETH Zürich
 logo: /assets/img/headshot_circle.png
 #theme: jekyll-theme-minimal
 remote_theme: vaibhavvikas/jekyll-theme-minimalistic
 favicon: true
 color-scheme: light
+email: dustin.brunner@gmx.ch
+platforms:
+  - name: LinkedIn
+    icon: <i class="fa-brands fa-linkedin"></i>
+    link: https://www.linkedin.com/in/dustinbrunner
+  - name: GitHub
+    icon: <i class="fa-brands fa-github"></i>
+    link: https://github.com/brunnedu
+  - name: Google Scholar
+    icon: <i class="fa-brands fa-google-scholar"></i>
+    link: https://scholar.google.com/citations?user=G4x3x_0AAAAJ
