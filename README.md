@@ -62,7 +62,7 @@ Feel free to **connect** if you’re interested in collaborating! I’m eager to
 - **Data Management**: SQL, Spark, Hadoop, HBase, MongoDB, Neo4j
 - **Other**: Git, Docker, Bash, MLOps, CI/CD, GitHub Actions, Notion, Jira
 - **Focus Areas**: Forecasting, Visualization, Explainability, Causal Inference, Natural Language Processing (NLP), Graph Neural Networks
-- **Languages**: German (Native), English (Proficient), French (Elementary)
+- **Languages**: German _(Native)_, English _(Proficient)_, French _(Elementary)_
 
 ---
 

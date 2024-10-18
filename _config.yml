@@ -1,3 +1,4 @@
 title: Portfolio
 logo: /assets/img/headshot_circle.png
-theme: jekyll-theme-minimal
+#theme: jekyll-theme-minimal
+remote_theme: vaibhavvikas/jekyll-theme-minimalistic
