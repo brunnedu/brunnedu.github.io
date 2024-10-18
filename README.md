@@ -103,9 +103,9 @@ German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 Paper _(confidential - under submission)_ | [Smartvote](https://www.smartvote.ch/)
 
 Identified 11 vulnerabilities in the swiss voting advice application **Smartvote** with
-some allowing for more than 3.5x visibility gains for individual parties. Proposed 10
+some allowing for more than **3.5x visibility gains** for individual parties. Proposed 10
 mitigations to significantly reduce or eliminate these vulnerabilities. Findings are
-being adopted in Smartvote’s redesign for the next elections.  
+being **adopted** in Smartvote’s redesign for the next elections.  
 
 **Technologies**: Python, Pandas, D-Tale, SciPy, Optuna, Plotly, LaTex, Notion
 
@@ -115,7 +115,7 @@ being adopted in Smartvote’s redesign for the next elections.
 *Semester Project* (Sep 2023 - Dec 2023)  
 [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 
-Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal was to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
+Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal was to filter a **CommonCrawl** image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
 
 **Technologies**: Python, PyTorch Lightning, SLURM (Cluster), CLIP (Contrastive Language-Image Pretraining)
 
@@ -125,17 +125,17 @@ Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML b
 *Interactive ML Project* (Feb 2023 - Jul 2023)  
 [Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://github.com/brunnedu/BasketXplainer)  
 
-Developed an interactive dashboard to predict basketball game outcomes based on in-game stats and explain predictions using SHAP values. Users could modify team statistics to explore **what-if scenarios**.  
+Developed an interactive dashboard to predict basketball game outcomes based on in-game stats and explain predictions using **SHAP** values. Users could modify team statistics to explore **what-if scenarios**.  
 
 **Technologies**: Python, scikit-learn, SHAP, Flask, Javascript, React, Gitlab Pipelines
 
 ![BasketXplainer Prediction](assets/img/basketxplainer_prediction.png)
 
 ### Darts Forecasting Library
-*Open-Source Contributor* (Sep 2021 - Aug 2022)  
+*Contributor* (Sep 2021 - Aug 2022)  
 [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
 
-Core contributor to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by vectorizing computations achieving a speedup of up to 400x.  
+**Core contributor** to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by **vectorizing** computations achieving a speedup of up to **400x**.  
 
 **Technologies**: Python, PyTorch, scikit-learn, Matplotlib, Git, GitHub Actions
 ```
@@ -148,8 +148,8 @@ pip install darts
 *Bachelor’s Thesis* (Feb 2021 - Aug 2021)  
 [Report](https://pub.tik.ee.ethz.ch/students/2021-FS/BA-2021-17.pdf)  
 
-Developed a model that enables constant-time approximate shortest path distance
-queries on road networks, achieving an average mean relative error of less than 10%.  
+Developed a model that enables constant-time approximate **shortest path distance
+queries** on road networks, achieving an average mean relative error of less than **10%**.  
 
 **Technologies**: Python, NetworkX, PyTorch Geometric, (Hyperbolic) Graph Convolutional Networks ((H)GCNs)
 
