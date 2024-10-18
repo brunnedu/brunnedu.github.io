@@ -45,13 +45,13 @@ Feel free to **connect** if you’re interested in collaborating! I’m eager to
 
 <div style="text-align: left; margin-bottom: 20px;">
   <a href="https://www.linkedin.com/in/dustinbrunner" target="_blank" style="margin: 0 8px;"> <!-- Adjusted margin for better spacing -->
-    <img src="assets/img/linkedin_favicon.png" alt="LinkedIn" width="35" height="35"/>
+    <img src="assets/img/linkedin_favicon.png" alt="LinkedIn" width="30" height="30"/>
   </a>
   <a href="https://github.com/brunnedu" target="_blank" style="margin: 0 8px;">
-    <img src="assets/img/github_favicon.png" alt="GitHub" width="35" height="35"/>
+    <img src="assets/img/github_favicon.png" alt="GitHub" width="30" height="30"/>
   </a>
   <a href="https://scholar.google.com/citations?user=G4x3x_0AAAAJ" target="_blank" style="margin: 0 8px;">
-    <img src="assets/img/google_scholar_favicon.png" alt="Google Scholar" width="35" height="35"/>
+    <img src="assets/img/google_scholar_favicon.png" alt="Google Scholar" width="30" height="30"/>
   </a>
 </div>
 

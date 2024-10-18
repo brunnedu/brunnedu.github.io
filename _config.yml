@@ -2,5 +2,3 @@
 title: Dustin Brunner
 logo: /assets/img/headshot_circle.png
 theme: jekyll-theme-minimal
-includes:
-  - head_custom.html
