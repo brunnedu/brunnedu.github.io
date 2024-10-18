@@ -1,4 +1,4 @@
-# Data Scientist
+# Dustin Brunner
 
 **[MSc Computer Science @ ETH Zürich](https://inf.ethz.ch/)**  
 **Machine Intelligence & Data Management**
