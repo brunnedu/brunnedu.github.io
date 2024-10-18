@@ -1,7 +1,9 @@
-# Dustin Brunner
+[//]: # (# Dustin Brunner)
 
-**[MSc Computer Science @ ETH Zürich](https://inf.ethz.ch/)**  
-**Machine Intelligence & Data Management**
+[//]: # ()
+[//]: # (**[MSc Computer Science @ ETH Zürich]&#40;https://inf.ethz.ch/&#41;**  )
+
+[//]: # (**Machine Intelligence & Data Management**)
 
 [//]: # (---)
 

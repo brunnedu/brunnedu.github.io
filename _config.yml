@@ -1,4 +1,7 @@
-title: Portfolio
+title: Dustin Brunner
+description: MSc Computer Science @ ETH Zürich | Data Science
 logo: /assets/img/headshot_circle.png
 #theme: jekyll-theme-minimal
 remote_theme: vaibhavvikas/jekyll-theme-minimalistic
+favicon: true
+color-scheme: light
