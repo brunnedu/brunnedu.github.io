@@ -5,6 +5,7 @@ logo: /assets/img/headshot_circle.png
 remote_theme: vaibhavvikas/jekyll-theme-minimalistic
 favicon: true
 color-scheme: light
+
 platforms:
   - name: LinkedIn
     icon: <i class="fa-brands fa-linkedin"></i>
@@ -15,3 +16,19 @@ platforms:
   - name: Google Scholar
     icon: <i class="fa-brands fa-google-scholar"></i>
     link: https://scholar.google.com/citations?user=G4x3x_0AAAAJ
+
+navigation:
+  - name: Hey There!
+    link: ./#hey-there
+  - name: Skills
+    link: ./#skills
+  - name: Education
+    link: ./#education
+  - name: Experience
+    link: ./#experience
+  - name: Projects
+    link: ./#projects
+  - name: Achievements
+    link: ./#achievements
+  - name: Hobbies
+    link: ./#hobbies
