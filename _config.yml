@@ -5,7 +5,6 @@ logo: /assets/img/headshot_circle.png
 remote_theme: vaibhavvikas/jekyll-theme-minimalistic
 favicon: true
 color-scheme: light
-email: dustin.brunner@gmx.ch
 platforms:
   - name: LinkedIn
     icon: <i class="fa-brands fa-linkedin"></i>

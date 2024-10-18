@@ -59,12 +59,18 @@ Feel free to **connect** if you’re interested in collaborating! I’m eager to
 
 ## Skills
 
-- **Programming Languages**: Python, R, C++, Java, Typescript
-- **Frameworks & Libraries**: PyTorch, NumPy, Pandas, Optuna, Plotly, Hugging Face, tidyverse
-- **Data Management**: SQL, Spark, Hadoop, HBase, MongoDB, Neo4j
-- **Other**: Git, Docker, Bash, MLOps, CI/CD, GitHub Actions, Notion, Jira
-- **Focus Areas**: Forecasting, Visualization, Explainability, Causal Inference, Natural Language Processing (NLP), Graph Neural Networks
-- **Languages**: German _(Native)_, English _(Proficient)_, French _(Elementary)_
+**Programming Languages**  
+Python • R • C++ • Java • Typescript  
+**Frameworks & Libraries**  
+PyTorch • NumPy • Pandas • Optuna • Plotly • Hugging Face • tidyverse  
+**Data Management**  
+SQL • Spark • Hadoop • HBase • MongoDB • Neo4j  
+**Other Tools**  
+Git • Docker • Bash • MLOps • CI/CD • GitHub Actions • Notion • Jira  
+**Focus Areas**  
+Forecasting • Visualization • Explainability • Causal Inference • Natural Language Processing (NLP) • Graph Neural Networks (GNNs)  
+**Languages**  
+German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 
 ---
 
@@ -166,9 +172,16 @@ queries on road networks, achieving an average mean relative error of less than 
 
 ## Achievements
 
-- **Advanced Machine Learning Projects (2023)**: Ranked 1st place twice and 7th place once out of >100 teams in competitively graded
-practical projects for the Advanced Machine Learning course at ETH Zürich.
-- **Mathematics Kangaroo Switzerland (2015)**: Ranked 40th out of 5,787 students in Switzerland’s largest mathematics competition.
+**Advanced Machine Learning Projects (2023)**  
+Achieved 1st place twice and 7th place once out of over 100 teams in practical projects for the Advanced Machine Learning course at ETH Zürich. The course was _competitively graded_, meaning that grades were interpolated between the score required to meet the baseline passing threshold (grade 4) and the highest-performing team (grade 6).
+
+1. **Tabular Regression**: Predicting age from brain scans — _1st place_
+2. **Timeseries Classification**: Classifying heart rhythm patterns from ECG signals — _7th place_
+3. **Video Segmentation**: Segmentation of mitral valve from ECG videos — _1st place_
+
+**Mathematics Kangaroo Switzerland (2015)**  
+Ranked 40th out of 5,787 students (top 0.7%) in Switzerland’s largest mathematics competition, which tests problem-solving and analytical skills through a series of math challenges.
+
 
 ---
 
