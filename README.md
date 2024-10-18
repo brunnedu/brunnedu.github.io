@@ -103,7 +103,7 @@ German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 Paper _(confidential - under submission)_ | [Smartvote](https://www.smartvote.ch/)
 
 Identified 11 vulnerabilities in the swiss voting advice application **Smartvote** with
-some allowing for more than **3.5x visibility gains** for individual parties. Proposed 10
+some allowing for more than 3.5x visibility gains for individual parties. Proposed 10
 mitigations to significantly reduce or eliminate these vulnerabilities. Findings are
 being **adopted** in Smartvote’s redesign for the next elections.  
 
@@ -135,7 +135,7 @@ Developed an interactive dashboard to predict basketball game outcomes based on 
 *Contributor* (Sep 2021 - Aug 2022)  
 [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
 
-**Core contributor** to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by **vectorizing** computations achieving a speedup of up to **400x**.  
+**Core contributor** to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by vectorizing computations achieving a speedup of up to **400x**.  
 
 **Technologies**: Python, PyTorch, scikit-learn, Matplotlib, Git, GitHub Actions
 ```
