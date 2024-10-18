@@ -107,7 +107,7 @@ being adopted in Smartvote’s redesign for the next elections.
 *Semester Project* (Sep 2023 - Dec 2023)  
 [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 
-Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal is to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
+Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML benchmark where the goal was to filter a CommonCrawl image-text dataset to train a **CLIP** model evaluated on 38 zero-shot downstream tasks, using a combination of cross-modality filtering and content alignment.  
 
 **Technologies**: Python, PyTorch Lightning, SLURM (Cluster), CLIP (Contrastive Language-Image Pretraining)
 
@@ -129,8 +129,8 @@ Developed an interactive dashboard to predict basketball game outcomes based on 
 
 Core contributor to the open-source time series forecasting library Darts by Unit8. Optimized the most popular regression forecasting models by vectorizing computations achieving a speedup of up to 400x.  
 
-**Technologies**: Python, PyTorch, scikit-learn, Matplotlib, Git, GitHub Actions, CI/CD
-```bash
+**Technologies**: Python, PyTorch, scikit-learn, Matplotlib, Git, GitHub Actions
+```
 pip install darts
 ```
 
