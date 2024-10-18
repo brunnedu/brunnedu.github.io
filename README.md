@@ -57,7 +57,7 @@ Feel free to **connect** if you’re interested in collaborating! I’m eager to
   </a>
 </div>
 
-# Skills
+## Skills
 
 **Programming Languages**  
 Python • R • C++ • Java • Typescript  
@@ -74,7 +74,7 @@ German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 
 ---
 
-# Education
+## Education
 
 **ETH Zürich**  
 *Master of Science in Computer Science* (2022 - 2024)  
@@ -86,9 +86,9 @@ German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 
 ---
 
-# Experience
+## Experience
 
-## Unit8 | Data Scientist  
+### Unit8 | Data Scientist  
 *Sep 2021 - Aug 2022* | Zürich, Switzerland  
 - Developed and implemented a route planning tool using **PySpark** and **Palantir Foundry**, optimizing logistics for a newspaper company.
 - Core contributor to the **Darts** library, optimizing model efficiency while reviewing pull requests, suggesting enhancements, and improving documentation.
@@ -96,9 +96,9 @@ German _(Native)_ • English _(Proficient)_ • French _(Elementary)_
 
 ---
 
-# Projects
+## Projects
 
-## Recommender Systems for Swiss Politics
+### Recommender Systems for Swiss Politics
 *Master’s Thesis* (Feb 2024 - Aug 2024)  
 Paper _(confidential - under submission)_ | [Smartvote](https://www.smartvote.ch/)
 
@@ -111,7 +111,7 @@ being adopted in Smartvote’s redesign for the next elections.
 
 ![RSFP Manipulation](assets/img/rsfp_manipulation.png)
 
-## DataComp Challenge
+### DataComp Challenge
 *Semester Project* (Sep 2023 - Dec 2023)  
 [Report](https://pub.tik.ee.ethz.ch/students/2023-HS/GA-2023-09.pdf) | [DataComp Website](https://www.datacomp.ai/)  
 
@@ -121,7 +121,7 @@ Ranked 4th out of 12 teams in the small track of the DataComp Challenge, an ML b
 
 ![DataComp Workflow](assets/img/datacomp_workflow.png)
 
-## BasketXplainer
+### BasketXplainer
 *Interactive ML Project* (Feb 2023 - Jul 2023)  
 [Interactive Demo](http://b5-winning-in-basketball.course-xai-iml23.isginf.ch/) | [Paper](https://rdcu.be/dXhu2) | [GitHub](https://github.com/brunnedu/BasketXplainer)  
 
@@ -131,7 +131,7 @@ Developed an interactive dashboard to predict basketball game outcomes based on 
 
 ![BasketXplainer Prediction](assets/img/basketxplainer_prediction.png)
 
-## Darts Forecasting Library
+### Darts Forecasting Library
 *Open-Source Contributor* (Sep 2021 - Aug 2022)  
 [Documentation](https://unit8co.github.io/darts/) | [Paper](https://arxiv.org/pdf/2110.03224) | [GitHub](https://github.com/unit8co/darts)  
 
@@ -144,7 +144,7 @@ pip install darts
 
 ![Darts Logo](assets/img/darts.png)
 
-## Distance Preserving Graph Embedding
+### Distance Preserving Graph Embedding
 *Bachelor’s Thesis* (Feb 2021 - Aug 2021)  
 [Report](https://pub.tik.ee.ethz.ch/students/2021-FS/BA-2021-17.pdf)  
 
@@ -170,7 +170,7 @@ queries on road networks, achieving an average mean relative error of less than 
 
 ---
 
-# Achievements
+## Achievements
 
 **Advanced Machine Learning Projects (2023)**  
 Achieved 1st place twice and 7th place once out of over 100 teams in practical projects for the Advanced Machine Learning course at ETH Zürich. The course was _competitively graded_, meaning that grades were interpolated between the score required to meet the baseline passing threshold (grade 4) and the highest-performing team (grade 6).
@@ -185,7 +185,7 @@ Ranked 40th out of 5,787 students (top 0.7%) in Switzerland’s largest mathemat
 
 ---
 
-# Hobbies
+## Hobbies
 
 - **Sports**: Squash, badminton, gym, padel tennis, table tennis
 - **Interests**: Coding, astrophotography, music, chess, geoguessr, learning new things
