@@ -173,7 +173,7 @@ queries** on road networks, achieving an average mean relative error of less tha
 ## Achievements
 
 **Advanced Machine Learning Projects (2023)**  
-Achieved 1st place twice and 7th place once out of over 100 teams in practical projects for the Advanced Machine Learning course at ETH Zürich. The course was _competitively graded_, meaning that grades were interpolated between the score required to meet the baseline passing threshold (grade 4) and the highest-performing team (grade 6).
+Achieved 1st place twice and 7th place once out of over 100 teams in practical projects for the Advanced Machine Learning course at ETH Zürich. The course was _competitively graded_, meaning that grades were interpolated between the passing baseline score (grade 4) and the best-performing team (grade 6).
 
 1. **Tabular Regression**: Predicting age from brain scans — _1st place_
 2. **Timeseries Classification**: Classifying heart rhythm patterns from ECG signals — _7th place_
