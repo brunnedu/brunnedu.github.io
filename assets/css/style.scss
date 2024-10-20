@@ -1,6 +1,8 @@
 ---
 ---
 
+@import "{{ site.theme }}";
+
 // Custom styles
 .wrapper {
   width: 1000px;
@@ -11,5 +13,3 @@
   width: 690px;
   margin: 0 auto; /* Centers the section within the wrapper */
 }
-
-@import "{{ site.theme }}";
