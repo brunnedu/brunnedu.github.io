@@ -1,0 +1,15 @@
+---
+---
+
+// Custom styles
+.wrapper {
+  width: 1000px;
+  margin: 0 auto; /* Centers the wrapper on the page */
+}
+
+.wrapper section {
+  width: 690px;
+  margin: 0 auto; /* Centers the section within the wrapper */
+}
+
+@import "{{ site.theme }}";
