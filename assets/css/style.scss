@@ -3,7 +3,7 @@
 
 @import "{{ site.theme }}";
 
-// Custom styles
+// Custom styles for larger screens
 .wrapper {
   width: 1000px;
   margin: 0 auto; /* Centers the wrapper on the page */
@@ -12,4 +12,26 @@
 .wrapper section {
   width: 690px;
   margin: 0 auto; /* Centers the section within the wrapper */
+}
+
+// Responsive styles for smaller screens
+@media print, screen and (max-width: 960px) {
+  .wrapper {
+    width: 610px;
+  }
+
+  .wrapper section {
+    width: 375px;
+  }
+}
+
+@media print, screen and (max-width: 720px) {
+  .wrapper {
+    width: auto; /* Allows the width to adjust to the screen size */
+  }
+
+  .wrapper section {
+    width: auto;
+    padding: 20px; /* Add padding for better readability */
+  }
 }
