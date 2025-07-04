@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(section);
     });
 
-    // ===== HERO SECTION ANIMATIONS =====
+    // ===== OPTIMIZED HERO SECTION ANIMATIONS =====
     const heroElements = [
         '.greeting',
         '.name',
@@ -54,20 +54,36 @@ document.addEventListener('DOMContentLoaded', () => {
         '.social-links-container'
     ];
 
-    // Sequential animation for hero elements
+    // Mobile-optimized animation settings
+    const animationDelay = isMobile() ? 200 : 300; // Faster on mobile
+    const animationDuration = isMobile() ? 0.6 : 0.8; // Shorter duration on mobile
+
+    // Sequential animation for hero elements with performance optimization
     heroElements.forEach((selector, index) => {
         const element = document.querySelector(selector);
         if (element) {
+            // Set initial state
             element.style.opacity = '0';
             element.style.transform = 'translateY(20px)';
-            element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            element.style.transition = `opacity ${animationDuration}s ease, transform ${animationDuration}s ease`;
             
-            setTimeout(() => {
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-            }, index * 300);
+            // Use requestAnimationFrame for smoother animations
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * animationDelay);
+            });
         }
     });
+
+    // Add pulse animation to name after it appears (mobile-optimized)
+    setTimeout(() => {
+        const nameElement = document.querySelector('.name');
+        if (nameElement && !isMobile()) {
+            nameElement.style.animation = 'pulse 2s ease-in-out infinite';
+        }
+    }, heroElements.length * animationDelay + 500);
 
     // ===== SCROLL ARROW FUNCTIONALITY =====
     const scrollArrow = document.getElementById('scroll-arrow');
@@ -94,12 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentYearElement.textContent = new Date().getFullYear();
     }
 
-    // ===== PARTICLES.JS CONFIGURATION =====
+    // ===== MOBILE-OPTIMIZED PARTICLES.JS CONFIGURATION =====
     if (typeof particlesJS !== 'undefined') {
-        particlesJS('particles-js', {
+        const particleConfig = {
             "particles": {
                 "number": {
-                    "value": 60,
+                    "value": isMobile() ? 30 : 60, // Fewer particles on mobile
                     "density": {
                         "enable": true,
                         "value_area": 800
@@ -120,19 +136,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     "random": true
                 },
                 "size": {
-                    "value": 4,
+                    "value": isMobile() ? 3 : 4, // Smaller particles on mobile
                     "random": true
                 },
                 "line_linked": {
                     "enable": true,
-                    "distance": 150,
+                    "distance": isMobile() ? 100 : 150, // Shorter connections on mobile
                     "color": "#00b894",
                     "opacity": 0.4,
                     "width": 1.5
                 },
                 "move": {
                     "enable": true,
-                    "speed": 2,
+                    "speed": isMobile() ? 1.5 : 2, // Slower movement on mobile
                     "direction": "none",
                     "random": false,
                     "straight": false,
@@ -144,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "detect_on": "window",
                 "events": {
                     "onhover": {
-                        "enable": true,
+                        "enable": !isMobile(), // Disable hover on mobile for better performance
                         "mode": "repulse"
                     },
                     "onclick": {
@@ -173,6 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             "retina_detect": true
-        });
+        };
+        
+        particlesJS('particles-js', particleConfig);
     }
 }); 
