@@ -34,7 +34,7 @@ body {
 
 /* ===== HERO SECTION ===== */
 .hero {
-    min-height: 90vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,6 +158,9 @@ body {
     justify-content: center;
     gap: 1rem;
     margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .quick-link {
@@ -199,9 +202,10 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: var(--transition);
+    transition: opacity 0.8s ease, transform 0.8s ease;
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow);
+    opacity: 0;
 }
 
 .scroll-arrow:hover {
@@ -620,5 +624,11 @@ body > *:not(#particles-js) {
     .hobby-list li {
         font-size: 0.85rem;
         padding: 0.25rem 0.6rem;
+    }
+
+    /* Hero section mobile fixes */
+    .hero {
+        min-height: 100vh;
+        padding: 2rem 0;
     }
 } 

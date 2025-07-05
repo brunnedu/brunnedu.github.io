@@ -51,7 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         '.title-text', 
         '.subtitle',
         '.headshot-container',
-        '.social-links-container'
+        '.social-links-container',
+        '.quick-links',
+        '.scroll-arrow'
     ];
 
     // Mobile-optimized animation settings
@@ -64,14 +66,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (element) {
             // Set initial state
             element.style.opacity = '0';
-            element.style.transform = 'translateY(20px)';
+            
+            // Special handling for scroll arrow to preserve centering
+            if (selector === '.scroll-arrow') {
+                element.style.transform = 'translateX(-50%) translateY(20px)';
+            } else {
+                element.style.transform = 'translateY(20px)';
+            }
+            
             element.style.transition = `opacity ${animationDuration}s ease, transform ${animationDuration}s ease`;
             
             // Use requestAnimationFrame for smoother animations
             requestAnimationFrame(() => {
                 setTimeout(() => {
                     element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
+                    
+                    // Special handling for scroll arrow to preserve centering
+                    if (selector === '.scroll-arrow') {
+                        element.style.transform = 'translateX(-50%) translateY(0)';
+                    } else {
+                        element.style.transform = 'translateY(0)';
+                    }
                 }, index * animationDelay);
             });
         }
@@ -89,9 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollArrow = document.getElementById('scroll-arrow');
     if (scrollArrow) {
         scrollArrow.addEventListener('click', () => {
-            // Hide the arrow with animation
-            scrollArrow.classList.add('hidden');
-            
             // Scroll to about section
             const aboutSection = document.getElementById('about-me');
             if (aboutSection) {
