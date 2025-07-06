@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const particleConfig = {
             "particles": {
                 "number": {
-                    "value": isMobile() ? 30 : 60, // Fewer particles on mobile
+                    "value": isMobile() ? 45 : 60, // Fewer particles on mobile
                     "density": {
                         "enable": true,
                         "value_area": 800
@@ -148,15 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     "random": true
                 },
                 "size": {
-                    "value": isMobile() ? 3 : 3, // Smaller particles on mobile
+                    "value": isMobile() ? 2 : 3, // Smaller particles on mobile
                     "random": true
                 },
                 "line_linked": {
                     "enable": true,
-                    "distance": isMobile() ? 100 : 150, // Shorter connections on mobile
+                    "distance": isMobile() ? 100 : 200, // Shorter connections on mobile
                     "color": "#00b894",
                     "opacity": 0.4,
-                    "width": 1.5
+                    "width": 1
                 },
                 "move": {
                     "enable": true,
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         "duration": 0.4
                     },
                     "push": {
-                        "particles_nb": 4
+                        "particles_nb": 6
                     },
                     "remove": {
                         "particles_nb": 2
