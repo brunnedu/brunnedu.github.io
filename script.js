@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     "random": true
                 },
                 "size": {
-                    "value": isMobile() ? 3 : 4, // Smaller particles on mobile
+                    "value": isMobile() ? 3 : 3, // Smaller particles on mobile
                     "random": true
                 },
                 "line_linked": {
