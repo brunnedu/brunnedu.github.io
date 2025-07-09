@@ -7,31 +7,37 @@ function showMainSections() {
   document.getElementById('visualizations')?.classList.remove('hidden-on-load');
 }
 
-function countWordOccurrences(messages, { byParticipant = false, ngram = 1, skipEmojis = false } = {}) {
+function countWordOccurrences(
+  messages,
+  { byParticipant = false, ngram = 1, skipEmojis = false } = {}
+) {
   // Clean phrases to remove
   const cleanPhrases = [
     /<Media omitted>/gi,
     /<This message was edited>/gi,
     /This message was deleted/gi,
-    /live location shared/gi
+    /live location shared/gi,
   ];
   const emojiRegex = /\p{Extended_Pictographic}/gu;
   // Helper to clean and split message
   function getWords(msg) {
     let cleaned = msg;
-    cleanPhrases.forEach(re => { cleaned = cleaned.replace(re, ''); });
-    let words = cleaned.split(/\s+/)
-      .map(word => word.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, ''))
+    cleanPhrases.forEach((re) => {
+      cleaned = cleaned.replace(re, '');
+    });
+    let words = cleaned
+      .split(/\s+/)
+      .map((word) => word.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, ''))
       .filter(Boolean);
     if (skipEmojis) {
-      words = words.filter(w => !emojiRegex.test(w));
+      words = words.filter((w) => !emojiRegex.test(w));
     }
     return words;
   }
   if (byParticipant) {
     // { user: { word: count } }
     const counts = {};
-    messages.forEach(m => {
+    messages.forEach((m) => {
       if (!m.user) return; // Skip system messages or group modifications
       if (!counts[m.user]) counts[m.user] = {};
       const words = getWords(m.message);
@@ -44,7 +50,7 @@ function countWordOccurrences(messages, { byParticipant = false, ngram = 1, skip
   } else {
     // { word: count }
     const counts = {};
-    messages.forEach(m => {
+    messages.forEach((m) => {
       if (!m.user) return; // Skip system messages or group modifications
       const words = getWords(m.message);
       for (let i = 0; i <= words.length - ngram; i++) {
@@ -55,6 +61,8 @@ function countWordOccurrences(messages, { byParticipant = false, ngram = 1, skip
     return counts;
   }
 }
+
+let fileText;
 
 document.addEventListener('DOMContentLoaded', function () {
   const uploadArea = document.getElementById('upload-area');
@@ -80,6 +88,134 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Click browse button triggers file input
   browseBtn.addEventListener('click', () => fileInput.click());
+
+  // Sample chat button functionality
+  const sampleBtn = document.getElementById('sample-btn');
+  sampleBtn.addEventListener('click', () => {
+    setStatus('Loading sample chat...', true);
+    fetch('assets/WhatsApp Chat Sample.txt')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to load sample file');
+        }
+        return response.text();
+      })
+      .then((text) => {
+        setStatus('Parsing sample chat...', true);
+        let messages = [];
+        try {
+          messages = parseWhatsAppChat(text);
+          lastLoadedMessages = messages;
+          if (!messages.length) {
+            setStatus('No valid messages found in sample file.');
+            return;
+          }
+          setStatus('Sample chat loaded successfully!', true);
+          // Show green upload area and success message inside
+          uploadArea.classList.add('success');
+          uploadArea.innerHTML = `<input type="file" id="file-input" accept=".txt" style="display:none" />
+            <div class="button-container">
+              <button id="sample-btn" type="button">Try Sample Chat</button>
+              <div class="or-divider">or</div>
+              <button id="browse-btn" type="button">Upload Your Chat</button>
+            </div>
+            <p>drag & drop your WhatsApp chat file</p>
+            <div class="upload-success-message" style="color:#00b894; font-weight:600; margin-top:1em;">Sample chat loaded successfully! 🎉</div>`;
+          // Re-attach event listeners
+          const newFileInput = uploadArea.querySelector('#file-input');
+          const newBrowseBtn = uploadArea.querySelector('#browse-btn');
+          const newSampleBtn = uploadArea.querySelector('#sample-btn');
+          newBrowseBtn.addEventListener('click', () => newFileInput.click());
+          newFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFile(e.target.files[0]);
+            }
+          });
+          newSampleBtn.addEventListener('click', () => {
+            // Re-trigger sample loading
+            newSampleBtn.click();
+          });
+          showMainSections();
+          showSummary(messages);
+          renderParticipantSummaries(messages);
+          renderWordCloud(messages);
+          // Smooth scroll to chat summary
+          const fileUploadSection = document.getElementById('file-upload');
+          if (fileUploadSection) {
+            fileUploadSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } catch (err) {
+          setStatus(
+            'Error parsing sample: ' + (err && err.message ? err.message : 'Unknown error.')
+          );
+          return;
+        }
+        // Render visualizations, catch errors per chart
+        try {
+          renderActivityOverTime(messages);
+        } catch (err) {
+          showVizError('viz-activity-over-time', err);
+        }
+        try {
+          renderMessagesByParticipant(messages);
+        } catch (err) {
+          showVizError('viz-messages-by-participant', err);
+        }
+        try {
+          renderHourlyActivity(messages);
+        } catch (err) {
+          showVizError('viz-hourly-activity', err);
+        }
+        try {
+          renderLongestStreaks(messages);
+        } catch (err) {
+          showVizError('viz-longest-streaks', err);
+        }
+        try {
+          renderWeeklyHeatmap(messages);
+        } catch (err) {
+          showVizError('viz-weekly-heatmap', err);
+        }
+        try {
+          renderEmojiChart(messages);
+        } catch (err) {
+          showVizError('viz-emojis', err);
+        }
+        try {
+          renderResponseTimeHistogram(messages);
+        } catch (err) {
+          showVizError('viz-response-time', err);
+        }
+        try {
+          renderMostUsedWords(messages);
+        } catch (err) {
+          showVizError('viz-most-used-words', err);
+        }
+        try {
+          renderActivityOverTimeGrouped(messages);
+        } catch (err) {
+          showVizError('viz-activity-over-time-grouped', err);
+        }
+        try {
+          renderActivityOverTimeStackedPercent(messages);
+        } catch (err) {
+          showVizError('viz-activity-over-time-stacked-percent', err);
+        }
+        try {
+          renderMessageLengthHistogram(messages);
+        } catch (err) {
+          showVizError('viz-message-length-histogram', err);
+        }
+        try {
+          renderLongestSilences(messages);
+        } catch (err) {
+          showVizError('viz-longest-silences', err);
+        }
+      })
+      .catch((error) => {
+        setStatus('Error loading sample file: ' + error.message);
+      });
+  });
 
   // Handle file input change
   fileInput.addEventListener('change', (e) => {
@@ -111,7 +247,8 @@ document.addEventListener('DOMContentLoaded', function () {
       setStatus('Please upload a .txt file exported from WhatsApp.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
       setStatus('File is too large. Please upload a file smaller than 5MB.');
       return;
     }
@@ -120,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
     reader.onload = function (e) {
       setStatus('Parsing chat...', true);
       const text = e.target.result;
+      fileText = e.target.result;
       let messages = [];
       try {
         messages = parseWhatsAppChat(text);
@@ -133,8 +271,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show green upload area and success message inside
         uploadArea.classList.add('success');
         uploadArea.innerHTML = `<input type="file" id="file-input" accept=".txt" style="display:none" />
-          <button id="browse-btn" type="button">Browse .txt File</button>
-          <p>or drag and drop your WhatsApp chat .txt file here</p>
+          <div class="button-container">
+            <button id="sample-btn" type="button">Try Sample Chat</button>
+            <div class="or-divider">or</div>
+            <button id="browse-btn" type="button">Upload Your Chat</button>
+          </div>
+          <p>drag & drop your WhatsApp chat file</p>
           <div class="upload-success-message" style="color:#00b894; font-weight:600; margin-top:1em;">Export parsed successfully! 🎉</div>`;
         // Re-attach event listeners for file input and browse button
         const newFileInput = uploadArea.querySelector('#file-input');
@@ -160,17 +302,66 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       // Render visualizations, catch errors per chart
-      try { renderActivityOverTime(messages); } catch (err) { showVizError('viz-activity-over-time', err); }
-      try { renderMessagesByParticipant(messages); } catch (err) { showVizError('viz-messages-by-participant', err); }
-      try { renderHourlyActivity(messages); } catch (err) { showVizError('viz-hourly-activity', err); }
-      try { renderLongestStreaks(messages); } catch (err) { showVizError('viz-longest-streaks', err); }
-      try { renderWeeklyHeatmap(messages); } catch (err) { showVizError('viz-weekly-heatmap', err); }
-      try { renderEmojiChart(messages); } catch (err) { showVizError('viz-emojis', err); }
-      try { renderResponseTimeHistogram(messages); } catch (err) { showVizError('viz-response-time', err); }
-      try { renderMostUsedWords(messages); } catch (err) { showVizError('viz-most-used-words', err); }
-      try { renderActivityOverTimeGrouped(messages); } catch (err) { showVizError('viz-activity-over-time-grouped', err); }
-      try { renderActivityOverTimeStackedPercent(messages); } catch (err) { showVizError('viz-activity-over-time-stacked-percent', err); }
-      try { renderMessageLengthHistogram(messages); } catch (err) { showVizError('viz-message-length-histogram', err); }
+      try {
+        renderActivityOverTime(messages);
+      } catch (err) {
+        showVizError('viz-activity-over-time', err);
+      }
+      try {
+        renderMessagesByParticipant(messages);
+      } catch (err) {
+        showVizError('viz-messages-by-participant', err);
+      }
+      try {
+        renderHourlyActivity(messages);
+      } catch (err) {
+        showVizError('viz-hourly-activity', err);
+      }
+      try {
+        renderLongestStreaks(messages);
+      } catch (err) {
+        showVizError('viz-longest-streaks', err);
+      }
+      try {
+        renderWeeklyHeatmap(messages);
+      } catch (err) {
+        showVizError('viz-weekly-heatmap', err);
+      }
+      try {
+        renderEmojiChart(messages);
+      } catch (err) {
+        showVizError('viz-emojis', err);
+      }
+      try {
+        renderResponseTimeHistogram(messages);
+      } catch (err) {
+        showVizError('viz-response-time', err);
+      }
+      try {
+        renderMostUsedWords(messages);
+      } catch (err) {
+        showVizError('viz-most-used-words', err);
+      }
+      try {
+        renderActivityOverTimeGrouped(messages);
+      } catch (err) {
+        showVizError('viz-activity-over-time-grouped', err);
+      }
+      try {
+        renderActivityOverTimeStackedPercent(messages);
+      } catch (err) {
+        showVizError('viz-activity-over-time-stacked-percent', err);
+      }
+      try {
+        renderMessageLengthHistogram(messages);
+      } catch (err) {
+        showVizError('viz-message-length-histogram', err);
+      }
+      try {
+        renderLongestSilences(messages);
+      } catch (err) {
+        showVizError('viz-longest-silences', err);
+      }
     };
     reader.onerror = function () {
       setStatus('Error reading file. Please try again.');
@@ -178,21 +369,63 @@ document.addEventListener('DOMContentLoaded', function () {
     reader.readAsText(file);
   }
 
-  // Parse WhatsApp chat into array of {timestamp, user, message}
   function parseWhatsAppChat(text) {
-    // Regex for WhatsApp user message: {DATE}, {TIME} - {USER}: {MESSAGE}
-    const userMsgRegex = /^(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}),? (\d{1,2}:\d{2})[ \t]*[\-\u2013][ \t]*(.+?): (.*)$/u;
-    const lines = text.split(/\r?\n/);
+    const unwantedCharsRegex =
+      /[\u200B\u200C\u200D\u202A\u202B\u202C\u202D\u202E\u200E\u200F\u00AD]/g;
+
+    // Regex for headers like: 12/31/23, 11:59 PM - (captures full header)
+    const headerRegex =
+      /(?<full>(?<date>\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}), (?<time>\d{1,2}:\d{2}) [\-\u2013] )/g;
+
+    // Clean and normalize text
+    text = text.replace(unwantedCharsRegex, '');
+    text = text.normalize('NFKD');
+
+    const matches = [...text.matchAll(headerRegex)];
     const messages = [];
-    for (let line of lines) {
-      const match = line.match(userMsgRegex);
-      if (match) {
-        const [_, date, time, user, message] = match;
-        const timestamp = parseDateTime(date, time);
-        messages.push({ timestamp, user: user.trim(), message: message.trim() });
+
+    for (let i = 0; i < matches.length; i++) {
+      const current = matches[i];
+      const next = matches[i + 1];
+
+      const result = current.groups;
+      const startIndex = current.index + current.groups.full.length;
+      const endIndex = next ? next.index : text.length;
+
+      // Extract raw message block between this header and next header
+      let rawMessage = text.slice(startIndex, endIndex).trim();
+
+      // Determine if user message or system message
+      // User message pattern: "username: message"
+      // If there is a colon after username, split accordingly
+      let user = null;
+      let message = rawMessage;
+
+      // Check for colon presence to split user and message
+      const colonIndex = rawMessage.indexOf(':');
+      if (colonIndex !== -1) {
+        // Extract possible username and message
+        // But only if the colon is early enough (to avoid colons inside message)
+        // Assume username is from start until colon (no line breaks in username)
+        const possibleUser = rawMessage.slice(0, colonIndex).trim();
+        const possibleMsg = rawMessage.slice(colonIndex + 1).trim();
+
+        // If username looks reasonable (no newline, length > 0), treat as user message
+        if (possibleUser.length > 0 && !possibleUser.includes('\n')) {
+          user = possibleUser;
+          message = possibleMsg;
+        }
       }
-      // else: skip meta/system messages
+
+      const timestamp = parseDateTime(result.date, result.time);
+
+      messages.push({
+        timestamp,
+        user,
+        message,
+      });
     }
+
     return messages;
   }
 
@@ -221,16 +454,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // Total messages
     const totalMessages = messages.length;
     // Participants
-    const participants = Array.from(new Set(messages.map(m => m.user)));
+    const participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
     // Date range
-    const dates = messages.map(m => new Date(m.timestamp));
+    const dates = messages.map((m) => new Date(m.timestamp));
     const firstDate = new Date(Math.min(...dates));
     const lastDate = new Date(Math.max(...dates));
     // Total characters
     const totalChars = messages.reduce((sum, m) => sum + m.message.length, 0);
     // Messages per day
     const dayCounts = {};
-    messages.forEach(m => {
+    messages.forEach((m) => {
       const day = m.timestamp.slice(0, 10);
       dayCounts[day] = (dayCounts[day] || 0) + 1;
     });
@@ -239,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const mostActiveDay = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0];
     // Most active hour
     const hourCounts = {};
-    messages.forEach(m => {
+    messages.forEach((m) => {
       const hour = new Date(m.timestamp).getHours();
       hourCounts[hour] = (hourCounts[hour] || 0) + 1;
     });
@@ -248,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Render summary cards directly inside #summary (after h3)
     const summarySection = document.getElementById('summary');
     // Remove any previous summary cards
-    Array.from(summarySection.querySelectorAll('.summary-cards')).forEach(el => el.remove());
+    Array.from(summarySection.querySelectorAll('.summary-cards')).forEach((el) => el.remove());
     const cards = document.createElement('div');
     cards.className = 'summary-cards';
     cards.innerHTML = `
@@ -257,8 +492,12 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="summary-card"><strong>Date Range</strong><br>${firstDate.toLocaleDateString()} – ${lastDate.toLocaleDateString()}</div>
       <div class="summary-card"><strong>Total Characters</strong><br>${totalChars}</div>
       <div class="summary-card"><strong>Avg. Messages/Day</strong><br>${avgPerDay}</div>
-      <div class="summary-card"><strong>Most Active Day</strong><br>${mostActiveDay ? mostActiveDay[0] + ' (' + mostActiveDay[1] + ')' : '-'}</div>
-      <div class="summary-card"><strong>Most Active Hour</strong><br>${mostActiveHour ? mostActiveHour[0] + ':00 (' + mostActiveHour[1] + ')' : '-'}</div>
+      <div class="summary-card"><strong>Most Active Day</strong><br>${
+        mostActiveDay ? mostActiveDay[0] + ' (' + mostActiveDay[1] + ')' : '-'
+      }</div>
+      <div class="summary-card"><strong>Most Active Hour</strong><br>${
+        mostActiveHour ? mostActiveHour[0] + ':00 (' + mostActiveHour[1] + ')' : '-'
+      }</div>
     `;
     summarySection.appendChild(cards);
   }
@@ -274,27 +513,28 @@ document.addEventListener('DOMContentLoaded', function () {
     container.innerHTML = '';
     // Prepare data: count messages per week
     const weekCounts = {};
-    messages.forEach(m => {
+    messages.forEach((m) => {
       const date = new Date(m.timestamp);
       const year = date.getFullYear();
       const week = getWeekNumber(date);
       const weekStr = `${year}-W${week.toString().padStart(2, '0')}`;
       weekCounts[weekStr] = (weekCounts[weekStr] || 0) + 1;
     });
-    const data = Object.entries(weekCounts).map(([week, count]) => ({ week, count }))
+    const data = Object.entries(weekCounts)
+      .map(([week, count]) => ({ week, count }))
       .sort((a, b) => a.week.localeCompare(b.week));
     if (data.length === 0) {
       container.textContent = 'No data to display.';
       return;
     }
     const trace = {
-      x: data.map(d => d.week),
-      y: data.map(d => d.count),
+      x: data.map((d) => d.week),
+      y: data.map((d) => d.count),
       type: 'scatter',
       mode: 'lines+markers',
       marker: { color: '#2a6ebb' },
       line: { color: '#2a6ebb', width: 3 },
-      hovertemplate: 'Week %{x}<br>%{y} messages<extra></extra>'
+      hovertemplate: 'Week %{x}<br>%{y} messages<extra></extra>',
     };
     const layout = {
       title: { text: 'Messages Over Time', font: { size: PLOTLY_TITLE_SIZE } },
@@ -305,51 +545,64 @@ document.addEventListener('DOMContentLoaded', function () {
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
         automargin: true,
         type: 'category',
-        nticks: Math.min(12, data.length)
+        nticks: Math.min(12, data.length),
       },
       yaxis: {
         title: 'Messages',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
       width: container.offsetWidth,
-      height: 320
+      height: 320,
     };
-    Plotly.newPlot(container, [trace], layout, {responsive: true});
+    Plotly.newPlot(container, [trace], layout, { responsive: true });
   }
-
 
   // Plotly Visualization: Hourly Activity Distribution (grouped by participant)
   function renderHourlyActivity(messages) {
     const container = document.getElementById('viz-hourly-activity');
     container.innerHTML = '';
     // Prepare data: count messages per hour per participant
-    let participants = Array.from(new Set(messages.map(m => m.user)));
+    let participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
     // Count total messages per participant
     const totalMessagesByUser = {};
-    participants.forEach(user => { totalMessagesByUser[user] = 0; });
-    messages.forEach(m => { totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1; });
+    participants.forEach((user) => {
+      totalMessagesByUser[user] = 0;
+    });
+    messages.forEach((m) => {
+      totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1;
+    });
     // Sort participants by total messages descending
     participants = participants.sort((a, b) => totalMessagesByUser[b] - totalMessagesByUser[a]);
     const hourCountsByUser = {};
-    participants.forEach(user => {
+    participants.forEach((user) => {
       hourCountsByUser[user] = Array(24).fill(0);
     });
-    messages.forEach(m => {
+    messages.forEach((m) => {
+      if (!m.user) return;
       const hour = new Date(m.timestamp).getHours();
       hourCountsByUser[m.user][hour]++;
     });
     // Normalize by participant: fraction of their messages per hour
     const hourFractionsByUser = {};
-    participants.forEach(user => {
+    participants.forEach((user) => {
       const total = totalMessagesByUser[user] || 1;
-      hourFractionsByUser[user] = hourCountsByUser[user].map(count => count / total);
+      hourFractionsByUser[user] = hourCountsByUser[user].map((count) => count / total);
     });
     const participantColors = [
-      '#2a6ebb', '#00b894', '#0984e3', '#00cec9', '#6c5ce7', '#fdcb6e', '#e17055', '#636e72'
+      '#2a6ebb',
+      '#00b894',
+      '#0984e3',
+      '#00cec9',
+      '#6c5ce7',
+      '#fdcb6e',
+      '#e17055',
+      '#636e72',
     ];
     const traces = participants.map((user, idx) => ({
       x: Array.from({ length: 24 }, (_, i) => i),
@@ -357,10 +610,13 @@ document.addEventListener('DOMContentLoaded', function () {
       name: user,
       type: 'bar',
       marker: { color: participantColors[idx % participantColors.length] },
-      hovertemplate: `${user}<br>Hour %{x}:00<br>%{y:.2f} of messages<extra></extra>`
+      hovertemplate: `${user}<br>Hour %{x}:00<br>%{y:.2f} of messages<extra></extra>`,
     }));
     const layout = {
-      title: { text: 'Hourly Activity Distribution by Participant', font: { size: PLOTLY_TITLE_SIZE } },
+      title: {
+        text: 'Hourly Activity Distribution by Participant',
+        font: { size: PLOTLY_TITLE_SIZE },
+      },
       margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
       barmode: 'group',
       xaxis: {
@@ -369,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tickvals: [0, 4, 8, 12, 16, 20, 23],
         ticktext: ['0', '4', '8', '12', '16', '20', '23'],
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       yaxis: {
         title: 'Fraction of Messages',
@@ -379,39 +635,47 @@ document.addEventListener('DOMContentLoaded', function () {
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       width: container.offsetWidth,
-      height: 680
+      height: 680,
     };
-    Plotly.newPlot(container, traces, layout, {responsive: true});
+    Plotly.newPlot(container, traces, layout, { responsive: true });
   }
 
   // Plotly Visualization: Longest Streak by Participant
   function renderLongestStreaks(messages) {
     const container = document.getElementById('viz-longest-streaks');
     container.innerHTML = '';
-  
+
     // Get unique participants
-    let participants = Array.from(new Set(messages.map(m => m.user)));
-  
+    let participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
+
     // Count total messages per participant
     const totalMessagesByUser = {};
-    participants.forEach(user => { totalMessagesByUser[user] = 0; });
-    messages.forEach(m => { totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1; });
-  
+    participants.forEach((user) => {
+      totalMessagesByUser[user] = 0;
+    });
+    messages.forEach((m) => {
+      totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1;
+    });
+
     // Sort participants by total messages descending (optional, can be changed)
     participants = participants.sort((a, b) => totalMessagesByUser[b] - totalMessagesByUser[a]);
-  
+
     // Compute longest streaks per participant
-    let streaks = participants.map(user => {
-      const userMsgs = messages.filter(m => m.user === user);
-      const dateSet = new Set(userMsgs.map(m => new Date(m.timestamp).toISOString().slice(0, 10)));
+    let streaks = participants.map((user) => {
+      const userMsgs = messages.filter((m) => m.user === user);
+      const dateSet = new Set(
+        userMsgs.map((m) => new Date(m.timestamp).toISOString().slice(0, 10))
+      );
       const dates = Array.from(dateSet).sort();
-  
+
       let maxStreak = 0;
       let currentStreak = 1;
       let maxStart = null;
       let maxEnd = null;
       let streakStart = null;
-  
+
       for (let i = 0; i < dates.length; i++) {
         if (i === 0) {
           streakStart = dates[i];
@@ -442,41 +706,57 @@ document.addEventListener('DOMContentLoaded', function () {
         user,
         maxStreak,
         maxStart,
-        maxEnd
+        maxEnd,
       };
     });
-  
+
     // Sort streaks descending by maxStreak
     streaks.sort((a, b) => b.maxStreak - a.maxStreak);
-  
+
     // Reverse to have longest streaks at top of horizontal bar chart
     const participantColors = [
-      '#2a6ebb', '#00b894', '#0984e3', '#00cec9', '#6c5ce7', '#fdcb6e', '#e17055', '#636e72'
+      '#2a6ebb',
+      '#00b894',
+      '#0984e3',
+      '#00cec9',
+      '#6c5ce7',
+      '#fdcb6e',
+      '#e17055',
+      '#636e72',
     ];
-  
-    const users = streaks.map(s => s.user).reverse();
-    const maxStreaks = streaks.map(s => s.maxStreak).reverse();
-    const texts = streaks.map(s => s.maxStreak > 0 ? `${s.maxStart} → ${s.maxEnd}` : 'No streak').reverse();
-    const colors = streaks.map((_, idx) => participantColors[idx % participantColors.length]).reverse();
-  
-    const traces = [{
-      x: maxStreaks,
-      y: users,
-      text: texts,
-      textposition: 'auto',
-      type: 'bar',
-      orientation: 'h',
-      marker: { color: colors },
-      hovertemplate: '%{y}<br>Longest streak: %{x} days<br>%{text}<extra></extra>'
-    }];
-  
+
+    const users = streaks.map((s) => s.user).reverse();
+    const maxStreaks = streaks.map((s) => s.maxStreak).reverse();
+    const texts = streaks
+      .map((s) => (s.maxStreak > 0 ? `${s.maxStart} → ${s.maxEnd}` : 'No streak'))
+      .reverse();
+    const colors = streaks
+      .map((_, idx) => participantColors[idx % participantColors.length])
+      .reverse();
+
+    const traces = [
+      {
+        x: maxStreaks,
+        y: users,
+        text: texts,
+        textposition: 'auto',
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: colors },
+        hovertemplate: '%{y}<br>Longest streak: %{x} days<br>%{text}<extra></extra>',
+      },
+    ];
+
     const layout = {
-      title: { text: 'Longest Streak by Participant (Consecutive Days with Messages)', font: { size: PLOTLY_TITLE_SIZE } },
+      title: {
+        text: 'Longest Streak by Participant (Consecutive Days with Messages)',
+        font: { size: PLOTLY_TITLE_SIZE },
+      },
       margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 60 },
       xaxis: {
         title: 'Longest Streak (days)',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       yaxis: {
         title: 'Participant',
@@ -487,12 +767,11 @@ document.addEventListener('DOMContentLoaded', function () {
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       width: container.offsetWidth,
-      height: 200 + streaks.length * 30
+      height: 200 + streaks.length * 30,
     };
-  
+
     Plotly.newPlot(container, traces, layout, { responsive: true });
   }
-  
 
   // Plotly Visualization: Weekly Pattern Heatmap
   function renderWeeklyHeatmap(messages) {
@@ -500,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
     container.innerHTML = '';
     // Prepare data: count messages by day of week and hour
     const heatmap = Array.from({ length: 7 }, () => Array(24).fill(0));
-    messages.forEach(m => {
+    messages.forEach((m) => {
       const date = new Date(m.timestamp);
       const day = date.getDay();
       const hour = date.getHours();
@@ -517,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
       colorscale: 'YlGnBu',
       hoverongaps: false,
       colorbar: { title: 'Messages' },
-      hovertemplate: '%{y}, %{x}:00<br>%{z} messages<extra></extra>'
+      hovertemplate: '%{y}, %{x}:00<br>%{z} messages<extra></extra>',
     };
     const layout = {
       title: { text: 'Weekly Pattern', font: { size: PLOTLY_TITLE_SIZE } },
@@ -528,19 +807,19 @@ document.addEventListener('DOMContentLoaded', function () {
         tickvals: [0, 4, 8, 12, 16, 20, 23],
         ticktext: ['0', '4', '8', '12', '16', '20', '23'],
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       yaxis: {
         title: 'Day',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       width: container.offsetWidth,
-      height: 340
+      height: 340,
     };
-    Plotly.newPlot(container, [trace], layout, {responsive: true});
+    Plotly.newPlot(container, [trace], layout, { responsive: true });
   }
 
   // Plotly Visualization: Most Used Emojis
@@ -552,9 +831,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add variation selector to legacy emoji for color rendering
     function withVariationSelector(emoji) {
       // List of legacy emoji codepoints that need VS16 for color
-      const legacy = ['\u263A', '\u2665', '\u2660', '\u2663', '\u2666', '\u2600', '\u2601', '\u2602', '\u2603', '\u260E', '\u2614', '\u2615', '\u2648', '\u2649', '\u264A', '\u264B', '\u264C', '\u264D', '\u264E', '\u264F', '\u2650', '\u2651', '\u2652', '\u2653'];
+      const legacy = [
+        '\u263A',
+        '\u2665',
+        '\u2660',
+        '\u2663',
+        '\u2666',
+        '\u2600',
+        '\u2601',
+        '\u2602',
+        '\u2603',
+        '\u260E',
+        '\u2614',
+        '\u2615',
+        '\u2648',
+        '\u2649',
+        '\u264A',
+        '\u264B',
+        '\u264C',
+        '\u264D',
+        '\u264E',
+        '\u264F',
+        '\u2650',
+        '\u2651',
+        '\u2652',
+        '\u2653',
+      ];
       // If emoji is a single codepoint and matches legacy, add VS16
-      if (emoji.length === 1 && legacy.includes('\\u' + emoji.charCodeAt(0).toString(16).toUpperCase())) {
+      if (
+        emoji.length === 1 &&
+        legacy.includes('\\u' + emoji.charCodeAt(0).toString(16).toUpperCase())
+      ) {
         return emoji + '\uFE0F';
       }
       // Also handle some common ones
@@ -562,20 +869,22 @@ document.addEventListener('DOMContentLoaded', function () {
       if (emoji === '♥') return '\u2665\uFE0F';
       return emoji;
     }
-    let data = Object.entries(emojiCounts).map(([emoji, count]) => ({ emoji: withVariationSelector(emoji), count }))
+    let data = Object.entries(emojiCounts)
+      .map(([emoji, count]) => ({ emoji: withVariationSelector(emoji), count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 20); // Top 20
     if (data.length === 0) {
       container.textContent = 'No emojis found.';
       return;
     }
-    const emojiFontStack = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif';
+    const emojiFontStack =
+      '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "EmojiOne Color", "Android Emoji", sans-serif';
     const trace = {
-      x: data.map(d => d.emoji),
-      y: data.map(d => d.count),
+      x: data.map((d) => d.emoji),
+      y: data.map((d) => d.count),
       type: 'bar',
       marker: { color: '#2a6ebb' },
-      hovertemplate: '%{y}<br>%{x} uses<extra></extra>'
+      hovertemplate: '%{y}<br>%{x} uses<extra></extra>',
     };
     const layout = {
       title: { text: 'Most Used Emojis', font: { size: PLOTLY_TITLE_SIZE } },
@@ -583,20 +892,20 @@ document.addEventListener('DOMContentLoaded', function () {
       xaxis: {
         title: 'Emoji',
         tickfont: { size: 24, family: emojiFontStack },
-        automargin: true
+        automargin: true,
       },
       yaxis: {
         title: 'Count',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
       width: container.offsetWidth,
-      height: 340
+      height: 340,
     };
-    Plotly.newPlot(container, [trace], layout, {responsive: true});
+    Plotly.newPlot(container, [trace], layout, { responsive: true });
   }
 
   // Plotly Visualization: Most Used Words
@@ -605,7 +914,8 @@ document.addEventListener('DOMContentLoaded', function () {
     container.innerHTML = '';
     // Use unified function for trigram (3-word sequence) frequencies
     const trigramCounts = countWordOccurrences(messages, { ngram: 3 });
-    let data = Object.entries(trigramCounts).map(([trigram, count]) => ({ trigram, count }))
+    let data = Object.entries(trigramCounts)
+      .map(([trigram, count]) => ({ trigram, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 20); // Top 20
     if (data.length === 0) {
@@ -613,12 +923,12 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     const trace = {
-      x: data.map(d => d.count),
-      y: data.map(d => d.trigram),
+      x: data.map((d) => d.count),
+      y: data.map((d) => d.trigram),
       type: 'bar',
       orientation: 'h',
       marker: { color: '#2a6ebb' },
-      hovertemplate: '%{y}<br>%{x} uses<extra></extra>'
+      hovertemplate: '%{y}<br>%{x} uses<extra></extra>',
     };
     const layout = {
       title: { text: 'Top 3-Word Sequences', font: { size: PLOTLY_TITLE_SIZE } },
@@ -626,21 +936,21 @@ document.addEventListener('DOMContentLoaded', function () {
       xaxis: {
         title: 'Count',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
       yaxis: {
         title: '3-Word Sequence',
         tickfont: { size: 16 },
         automargin: true,
-        categoryorder: 'total ascending'
+        categoryorder: 'total ascending',
       },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
       width: container.offsetWidth,
-      height: Math.max(220, data.length * 36 + 120)
+      height: Math.max(220, data.length * 36 + 120),
     };
-    Plotly.newPlot(container, [trace], layout, {responsive: true});
+    Plotly.newPlot(container, [trace], layout, { responsive: true });
   }
 
   // Plotly Visualization: Message Activity Over Time (Grouped by Participant, per week)
@@ -648,16 +958,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('viz-activity-over-time-grouped');
     container.innerHTML = '';
     // Prepare data: count messages per week per participant
-    let participants = Array.from(new Set(messages.map(m => m.user)));
+    let participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
     // Count total messages per participant
     const totalMessagesByUser = {};
-    participants.forEach(user => { totalMessagesByUser[user] = 0; });
-    messages.forEach(m => { totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1; });
+    participants.forEach((user) => {
+      totalMessagesByUser[user] = 0;
+    });
+    messages.forEach((m) => {
+      totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1;
+    });
     // Sort participants by total messages descending
     participants = participants.sort((a, b) => totalMessagesByUser[b] - totalMessagesByUser[a]);
     const weekCountsByUser = {};
-    participants.forEach(user => { weekCountsByUser[user] = {}; });
-    messages.forEach(m => {
+    participants.forEach((user) => {
+      weekCountsByUser[user] = {};
+    });
+    messages.forEach((m) => {
+      if (!m.user) return; // skip or continue
       const date = new Date(m.timestamp);
       // Get ISO week string: YYYY-Www
       const year = date.getFullYear();
@@ -666,27 +985,39 @@ document.addEventListener('DOMContentLoaded', function () {
       weekCountsByUser[m.user][weekStr] = (weekCountsByUser[m.user][weekStr] || 0) + 1;
     });
     // Get all week keys sorted
-    const allWeeks = Array.from(new Set(Object.values(weekCountsByUser).flatMap(obj => Object.keys(obj)))).sort();
+    const allWeeks = Array.from(
+      new Set(Object.values(weekCountsByUser).flatMap((obj) => Object.keys(obj)))
+    ).sort();
     // Prepare traces
     const participantColors = [
-      '#2a6ebb', '#00b894', '#0984e3', '#00cec9', '#6c5ce7', '#fdcb6e', '#e17055', '#636e72'
+      '#2a6ebb',
+      '#00b894',
+      '#0984e3',
+      '#00cec9',
+      '#6c5ce7',
+      '#fdcb6e',
+      '#e17055',
+      '#636e72',
     ];
     const traces = participants.map((user, idx) => ({
       x: allWeeks,
-      y: allWeeks.map(week => weekCountsByUser[user][week] || 0),
+      y: allWeeks.map((week) => weekCountsByUser[user][week] || 0),
       name: user,
       type: 'scatter',
       mode: 'lines+markers',
       marker: { color: participantColors[idx % participantColors.length] },
       line: { color: participantColors[idx % participantColors.length], width: 3 },
-      hovertemplate: `${user}<br>Week %{x}<br>%{y} messages<extra></extra>`
+      hovertemplate: `${user}<br>Week %{x}<br>%{y} messages<extra></extra>`,
     }));
-    if (traces.every(trace => trace.y.every(y => y === 0))) {
+    if (traces.every((trace) => trace.y.every((y) => y === 0))) {
       container.textContent = 'No data to display.';
       return;
     }
     const layout = {
-      title: { text: 'Message Activity Over Time (Grouped by Participant, per Week)', font: { size: PLOTLY_TITLE_SIZE } },
+      title: {
+        text: 'Message Activity Over Time (Grouped by Participant, per Week)',
+        font: { size: PLOTLY_TITLE_SIZE },
+      },
       margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
       xaxis: {
         title: 'Week',
@@ -694,27 +1025,27 @@ document.addEventListener('DOMContentLoaded', function () {
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
         automargin: true,
         type: 'category',
-        nticks: Math.min(12, allWeeks.length)
+        nticks: Math.min(12, allWeeks.length),
       },
       yaxis: {
         title: 'Messages per Week',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
-        automargin: true
+        automargin: true,
       },
-      plot_bgcolor: 'rgba(0,0,0,0)',  // transparent plot area
+      plot_bgcolor: 'rgba(0,0,0,0)', // transparent plot area
       paper_bgcolor: 'rgba(0,0,0,0)', // transparent entire chart background
       width: container.offsetWidth,
-      height: 680
+      height: 680,
     };
-    Plotly.newPlot(container, traces, layout, {responsive: true});
+    Plotly.newPlot(container, traces, layout, { responsive: true });
   }
   // Helper: Get ISO week number (1-53)
   function getWeekNumber(date) {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
   }
 
   // Plotly Visualization: Message Activity Over Time (Stacked Area, Percent by Participant, per month)
@@ -722,16 +1053,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('viz-activity-over-time-stacked-percent');
     container.innerHTML = '';
     // Prepare data: count messages per month per participant
-    let participants = Array.from(new Set(messages.map(m => m.user)));
+    let participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
     // Count total messages per participant
     const totalMessagesByUser = {};
-    participants.forEach(user => { totalMessagesByUser[user] = 0; });
-    messages.forEach(m => { totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1; });
+    participants.forEach((user) => {
+      totalMessagesByUser[user] = 0;
+    });
+    messages.forEach((m) => {
+      totalMessagesByUser[m.user] = (totalMessagesByUser[m.user] || 0) + 1;
+    });
     // Sort participants by total messages descending
     participants = participants.sort((a, b) => totalMessagesByUser[a] - totalMessagesByUser[b]);
     const monthCountsByUser = {};
-    participants.forEach(user => { monthCountsByUser[user] = {}; });
-    messages.forEach(m => {
+    participants.forEach((user) => {
+      monthCountsByUser[user] = {};
+    });
+    messages.forEach((m) => {
+      if (!m.user) return; // skip or continue
       const date = new Date(m.timestamp);
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -739,12 +1079,23 @@ document.addEventListener('DOMContentLoaded', function () {
       monthCountsByUser[m.user][monthStr] = (monthCountsByUser[m.user][monthStr] || 0) + 1;
     });
     // Get all month keys sorted
-    const allMonths = Array.from(new Set(Object.values(monthCountsByUser).flatMap(obj => Object.keys(obj)))).sort();
+    const allMonths = Array.from(
+      new Set(Object.values(monthCountsByUser).flatMap((obj) => Object.keys(obj)))
+    ).sort();
     // Compute total messages per month
-    const totalPerMonth = allMonths.map(month => participants.reduce((sum, user) => sum + (monthCountsByUser[user][month] || 0), 0));
+    const totalPerMonth = allMonths.map((month) =>
+      participants.reduce((sum, user) => sum + (monthCountsByUser[user][month] || 0), 0)
+    );
     // Prepare traces as percent
     const participantColors = [
-      '#2a6ebb', '#00b894', '#0984e3', '#00cec9', '#6c5ce7', '#fdcb6e', '#e17055', '#636e72'
+      '#2a6ebb',
+      '#00b894',
+      '#0984e3',
+      '#00cec9',
+      '#6c5ce7',
+      '#fdcb6e',
+      '#e17055',
+      '#636e72',
     ];
     const traces = participants.map((user, idx) => ({
       x: allMonths,
@@ -760,14 +1111,17 @@ document.addEventListener('DOMContentLoaded', function () {
       groupnorm: 'percent',
       marker: { color: participantColors[idx % participantColors.length] },
       line: { width: 0.5 },
-      hovertemplate: `${user}<br>Month %{x}<br>%{y:.1f}% of messages<extra></extra>`
+      hovertemplate: `${user}<br>Month %{x}<br>%{y:.1f}% of messages<extra></extra>`,
     }));
-    if (traces.every(trace => trace.y.every(y => y === 0))) {
+    if (traces.every((trace) => trace.y.every((y) => y === 0))) {
       container.textContent = 'No data to display.';
       return;
     }
     const layout = {
-      title: { text: 'Message Activity Over Time (Stacked Area, % by Participant, per Month)', font: { size: PLOTLY_TITLE_SIZE } },
+      title: {
+        text: 'Message Activity Over Time (Stacked Area, % by Participant, per Month)',
+        font: { size: PLOTLY_TITLE_SIZE },
+      },
       margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
       xaxis: {
         title: 'Month',
@@ -775,27 +1129,27 @@ document.addEventListener('DOMContentLoaded', function () {
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
         automargin: true,
         type: 'category',
-        nticks: Math.min(12, allMonths.length)
+        nticks: Math.min(12, allMonths.length),
       },
       yaxis: {
         title: 'Share of Messages (%)',
         tickfont: { size: PLOTLY_TICK_FONT_SIZE },
         automargin: true,
-        range: [0, 100]
+        range: [0, 100],
       },
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       width: container.offsetWidth,
-      height: 680
+      height: 680,
     };
-    Plotly.newPlot(container, traces, layout, {responsive: true});
+    Plotly.newPlot(container, traces, layout, { responsive: true });
   }
 
   // Plotly Visualization: Histogram of Message Lengths (in characters)
   function renderMessageLengthHistogram(messages) {
     const container = document.getElementById('viz-message-length-histogram');
     container.innerHTML = '';
-    const lengths = messages.map(m => m.message.length);
+    const lengths = messages.map((m) => m.message.length);
     if (lengths.length === 0) {
       container.textContent = 'No messages to display.';
       return;
@@ -805,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', function () {
       type: 'histogram',
       marker: { color: '#2a6ebb' },
       nbinsx: 200,
-      hovertemplate: '%{x} characters: %{y} messages<extra></extra>'
+      hovertemplate: '%{x} characters: %{y} messages<extra></extra>',
     };
     const layout = {
       title: { text: 'Message Lengths', font: { size: PLOTLY_TITLE_SIZE } },
@@ -825,37 +1179,43 @@ document.addEventListener('DOMContentLoaded', function () {
       paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
       width: container.offsetWidth,
-      height: 340
+      height: 340,
     };
-    Plotly.newPlot(container, [trace], layout, {responsive: true});
+    Plotly.newPlot(container, [trace], layout, { responsive: true });
   }
 
   // Unified word/ngram counting function
-  function countWordOccurrences(messages, { byParticipant = false, ngram = 1, skipEmojis = false } = {}) {
+  function countWordOccurrences(
+    messages,
+    { byParticipant = false, ngram = 1, skipEmojis = false } = {}
+  ) {
     // Clean phrases to remove
     const cleanPhrases = [
       /<Media omitted>/gi,
       /<This message was edited>/gi,
       /This message was deleted/gi,
-      /live location shared/gi
+      /live location shared/gi,
     ];
     const emojiRegex = /\p{Extended_Pictographic}/gu;
     // Helper to clean and split message
     function getWords(msg) {
       let cleaned = msg;
-      cleanPhrases.forEach(re => { cleaned = cleaned.replace(re, ''); });
-      let words = cleaned.split(/\s+/)
-        .map(word => word.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, ''))
+      cleanPhrases.forEach((re) => {
+        cleaned = cleaned.replace(re, '');
+      });
+      let words = cleaned
+        .split(/\s+/)
+        .map((word) => word.toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, ''))
         .filter(Boolean);
       if (skipEmojis) {
-        words = words.filter(w => !emojiRegex.test(w));
+        words = words.filter((w) => !emojiRegex.test(w));
       }
       return words;
     }
     if (byParticipant) {
       // { user: { word: count } }
       const counts = {};
-      messages.forEach(m => {
+      messages.forEach((m) => {
         if (!m.user) return; // Skip system messages or group modifications
         if (!counts[m.user]) counts[m.user] = {};
         const words = getWords(m.message);
@@ -868,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       // { word: count }
       const counts = {};
-      messages.forEach(m => {
+      messages.forEach((m) => {
         if (!m.user) return; // Skip system messages or group modifications
         const words = getWords(m.message);
         for (let i = 0; i <= words.length - ngram; i++) {
@@ -886,9 +1246,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const genderSigns = ['\u2640', '\u2642', '\u2640\uFE0F', '\u2642\uFE0F', '♀', '♂', '♀️', '♂️'];
     if (byParticipant) {
       const counts = {};
-      messages.forEach(m => {
+      messages.forEach((m) => {
         if (!counts[m.user]) counts[m.user] = {};
-        const emojis = Array.from(m.message.matchAll(emojiRegex), m => m[0]);
+        const emojis = Array.from(m.message.matchAll(emojiRegex), (m) => m[0]);
         for (let i = 0; i < emojis.length; i++) {
           if (genderSigns.includes(emojis[i])) continue;
           counts[m.user][emojis[i]] = (counts[m.user][emojis[i]] || 0) + 1;
@@ -897,8 +1257,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return counts;
     } else {
       const counts = {};
-      messages.forEach(m => {
-        const emojis = Array.from(m.message.matchAll(emojiRegex), m => m[0]);
+      messages.forEach((m) => {
+        const emojis = Array.from(m.message.matchAll(emojiRegex), (m) => m[0]);
         for (let i = 0; i < emojis.length; i++) {
           if (genderSigns.includes(emojis[i])) continue;
           counts[emojis[i]] = (counts[emojis[i]] || 0) + 1;
@@ -913,7 +1273,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById(containerId);
     if (container) {
       container.innerHTML = ''; // Clear previous content
-      container.textContent = 'Error rendering chart: ' + (err && err.message ? err.message : 'Unknown error.');
+      container.textContent =
+        'Error rendering chart: ' + (err && err.message ? err.message : 'Unknown error.');
       container.style.color = '#ff6b6b'; // Red color for error
       container.style.fontWeight = 'bold';
     }
@@ -931,32 +1292,51 @@ document.addEventListener('DOMContentLoaded', function () {
     return `${sec}s`;
   }
 
+  // Helper to format date as 'YYYY-MM-DD HH:MM'
+  function formatDateTimeNoSeconds(dateStr) {
+    const d = new Date(dateStr);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  }
+
   // Render participant summary cards
   function renderParticipantSummaries(messages) {
     const container = document.getElementById('participant-summaries');
     if (!container) return;
     container.innerHTML = '';
-    const participants = Array.from(new Set(messages.map(m => m.user)));
-    const emojiRegex = /\p{Extended_Pictographic}/gu;
+    const participants = Array.from(
+      new Set(messages.map((m) => m.user).filter((user) => user !== null))
+    );
     // Prepare participant stats for sorting
     // Use unified function for per-participant word counts (skip emojis)
-    const wordCountsByUser = countWordOccurrences(messages, { byParticipant: true, ngram: 1, skipEmojis: true });
+    const wordCountsByUser = countWordOccurrences(messages, {
+      byParticipant: true,
+      ngram: 1,
+      skipEmojis: true,
+    });
     // Use unified function for per-participant emoji counts
     const emojiCountsByUser = countEmojiOccurrences(messages, { byParticipant: true });
-    const participantStats = participants.map(user => {
-      const userMsgs = messages.filter(m => m.user === user);
+    const participantStats = participants.map((user) => {
+      const userMsgs = messages.filter((m) => m.user === user);
       const numMessages = userMsgs.length;
-      const avgMsgLen = numMessages > 0 ? (userMsgs.reduce((sum, m) => sum + m.message.length, 0) / numMessages).toFixed(1) : 0;
+      const avgMsgLen =
+        numMessages > 0
+          ? (userMsgs.reduce((sum, m) => sum + m.message.length, 0) / numMessages).toFixed(1)
+          : 0;
       // Most used emojis
       const emojiCounts = emojiCountsByUser[user] || {};
       const topEmojis = Object.entries(emojiCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 5)
         .map(([emoji]) => emoji);
       // Longest message
       let longestMsgText = '';
       let longestMsgLen = 0;
-      userMsgs.forEach(m => {
+      userMsgs.forEach((m) => {
         if (m.message.length > longestMsgLen) {
           longestMsgLen = m.message.length;
           longestMsgText = m.message;
@@ -966,7 +1346,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const wordCounts = wordCountsByUser[user] || {};
       const topWords = Object.entries(wordCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 5)
         .map(([word, count]) => ({ word, count }));
       // Longest gap between messages
       let longestGap = 0;
@@ -975,7 +1355,9 @@ document.addEventListener('DOMContentLoaded', function () {
       let lastMsgTime = null;
       if (userMsgs.length > 0) {
         // Sort messages by timestamp
-        const sortedMsgs = userMsgs.slice().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        const sortedMsgs = userMsgs
+          .slice()
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         lastMsgTime = new Date(sortedMsgs[sortedMsgs.length - 1].timestamp);
         for (let i = 1; i < sortedMsgs.length; i++) {
           const prev = new Date(sortedMsgs[i - 1].timestamp);
@@ -988,7 +1370,9 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
         // Also consider the gap from their last message to the most recent message in the chat
-        const mostRecentMsg = messages.reduce((a, b) => new Date(a.timestamp) > new Date(b.timestamp) ? a : b);
+        const mostRecentMsg = messages.reduce((a, b) =>
+          new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+        );
         const gapToNow = new Date(mostRecentMsg.timestamp) - lastMsgTime;
         if (gapToNow > longestGap) {
           longestGap = gapToNow;
@@ -1009,26 +1393,50 @@ document.addEventListener('DOMContentLoaded', function () {
         longestGap,
         gapStart,
         gapEnd,
-        lastMsgTime
+        lastMsgTime,
       };
     });
     // Sort by descending total messages
     participantStats.sort((a, b) => b.numMessages - a.numMessages);
     // Render cards
-    participantStats.forEach(stat => {
+    participantStats.forEach((stat) => {
       const card = document.createElement('div');
       card.className = 'participant-summary-card';
       card.innerHTML = `
         <h4>${stat.user}</h4>
-        <div class="stat-row"><span class="stat-label">Total Messages:</span> ${stat.numMessages}</div>
-        <div class="stat-row"><span class="stat-label">Average Message Length:</span> ${stat.avgMsgLen}</div>
-        <div class="stat-row"><span class="stat-label">Longest Message Length:</span> <span title="${stat.longestMsgText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}">${stat.longestMsgLen}</span></div>
-        <div class="stat-row"><span class="stat-label">Unique Words Used:</span> ${stat.uniqueWords}</div>
-        <div class="stat-row"><span class="stat-label">Longest Gap:</span> <span title="${stat.gapStart && stat.gapEnd ? `${stat.gapStart.toLocaleString()} → ${stat.gapEnd.toLocaleString()}` : ''}">${stat.longestGap ? formatDuration(stat.longestGap) : '—'}</span></div>
-        <div class="stat-row"><span class="stat-label">Last Message:</span> <span title="${stat.lastMsgTime ? stat.lastMsgTime.toLocaleString() : ''}">${stat.lastMsgTime ? stat.lastMsgTime.toLocaleDateString() : '—'}</span></div>
-        <div class="stat-row"><span class="stat-label">Top Emojis:</span> <span class="emoji-list">${stat.topEmojis.map(e => `<span title="${stat.emojiCounts[e]} uses">${e}</span>`).join(' ') || '—'}</span></div>
-        <div class="stat-row stat-top-words"><span class="stat-label">Top Words:</span></div>
-        <div class="top-words-list"><span class="top-words-list">${stat.topWords.map(w => `<span title="${w.count} uses">${w.word}</span>`).join('<br>') || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Messages:</span> ${
+          stat.numMessages
+        }</div>
+        <div class="stat-row"><span class="stat-label">Average Message Length:</span> ${
+          stat.avgMsgLen
+        }</div>
+        <div class="stat-row"><span class="stat-label">Longest Message Length:</span> <span title="${stat.longestMsgText
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')}">${stat.longestMsgLen}</span></div>
+        <div class="stat-row"><span class="stat-label">Unique Words Used:</span> ${
+          stat.uniqueWords
+        }</div>
+        <div class="stat-row"><span class="stat-label">Longest Gap:</span> <span title="${
+          stat.gapStart && stat.gapEnd
+            ? `${stat.gapStart.toLocaleString()} → ${stat.gapEnd.toLocaleString()}`
+            : ''
+        }">${stat.longestGap ? formatDuration(stat.longestGap) : '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Last Message:</span> <span title="${
+          stat.lastMsgTime ? stat.lastMsgTime.toLocaleString() : ''
+        }">${stat.lastMsgTime ? stat.lastMsgTime.toLocaleDateString() : '—'}</span></div>
+        <div class="stat-row stat-most-used-emojis"><span class="stat-label">Most Used Emojis</span></div>
+        <div class="top-words-list">${
+          stat.topEmojis
+            .map((e) => `<span class="top-word" title="${stat.emojiCounts[e]} uses">${e}</span>`)
+            .join('') || '—'
+        }</div>
+        <div class="stat-row stat-most-used-words"><span class="stat-label">Most Used Words</span></div>
+        <div class="top-words-list">${
+          stat.topWords
+            .map((w) => `<span class="top-word" title="${w.count} uses">${w.word}</span>`)
+            .join('') || '—'
+        }</div>
       `;
       container.appendChild(card);
     });
@@ -1050,22 +1458,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const words = sortedWords.map(([word]) => word);
     const counts = sortedWords.map(([, count]) => count);
     const totalMessages = messages.length;
-    const ratios = counts.map(count => count / totalMessages);
+    const ratios = counts.map((count) => count / totalMessages);
 
     // Normalize font sizes between 10 and 50
     const minSize = 10;
     const maxSize = 50;
     const minCount = Math.min(...counts);
     const maxCount = Math.max(...counts);
-    const sizes = counts.map(count =>
+    const sizes = counts.map((count) =>
       minCount === maxCount
         ? (minSize + maxSize) / 2
-        : minSize + (count - minCount) / (maxCount - minCount) * (maxSize - minSize)
+        : minSize + ((count - minCount) / (maxCount - minCount)) * (maxSize - minSize)
     );
 
-    const colors = words.map(() =>
-      `hsl(${Math.floor(Math.random() * 360)}, 70%, 45%)`
-    );
+    const colors = words.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 45%)`);
 
     // Random layout positions
     const trace = {
@@ -1076,15 +1482,16 @@ document.addEventListener('DOMContentLoaded', function () {
       text: words,
       textfont: {
         size: sizes,
-        color: colors
+        color: colors,
       },
-      hovertemplate: words.map((w, i) =>
-        `<b>${w}</b><br>` +
-        `Count: ${counts[i]}<br>` +
-        `Appears in ${(ratios[i] * 100).toFixed(1)}% of messages` +
-        `<extra></extra>`
+      hovertemplate: words.map(
+        (w, i) =>
+          `<b>${w}</b><br>` +
+          `Count: ${counts[i]}<br>` +
+          `Appears in ${(ratios[i] * 100).toFixed(1)}% of messages` +
+          `<extra></extra>`
       ),
-      hoverinfo: 'text'
+      hoverinfo: 'text',
     };
 
     const layout = {
@@ -1095,29 +1502,150 @@ document.addEventListener('DOMContentLoaded', function () {
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
       width: container.offsetWidth,
-      height: 500
+      height: 500,
     };
 
     Plotly.newPlot(container, [trace], layout, { responsive: true });
+  }
+
+  // Visualization: Longest Silences (Gaps Between Messages)
+  function renderLongestSilences(messages) {
+    const container = document.getElementById('viz-longest-silences');
+    container.innerHTML = '';
+    if (!messages || messages.length < 2) {
+      container.textContent = 'Not enough messages to compute silences.';
+      return;
+    }
+    // Compute all silences (gaps between consecutive messages)
+    const silences = [];
+    for (let i = 1; i < messages.length; i++) {
+      const prev = messages[i - 1];
+      const curr = messages[i];
+      const gap = new Date(curr.timestamp) - new Date(prev.timestamp);
+      silences.push({
+        duration: gap,
+        start: prev.timestamp,
+        end: curr.timestamp,
+        breaker: curr.user,
+      });
+    }
+    // Sort by duration descending, take top 5
+    const topSilences = silences.sort((a, b) => b.duration - a.duration).slice(0, 5);
+    if (topSilences.length === 0) {
+      container.textContent = 'No silences found.';
+      return;
+    }
+    // Render as a table
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.innerHTML = `
+      <thead>
+        <tr style="background:#f0f4fa; color:#2a6ebb;">
+          <th style="padding:0.5em 0.7em; text-align:center;">Duration</th>
+          <th style="padding:0.5em 0.7em; text-align:center;">Start</th>
+          <th style="padding:0.5em 0.7em; text-align:center;">End</th>
+          <th style="padding:0.5em 0.7em; text-align:center;">Broken By</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${topSilences
+          .map(
+            (s) => `
+          <tr>
+            <td style="padding:0.4em 0.7em; text-align:center;">${formatDuration(s.duration)}</td>
+            <td style="padding:0.4em 0.7em; text-align:center;">${formatDateTimeNoSeconds(
+              s.start
+            )}</td>
+            <td style="padding:0.4em 0.7em; text-align:center;">${formatDateTimeNoSeconds(
+              s.end
+            )}</td>
+            <td style="padding:0.4em 0.7em; color:#2a6ebb; font-weight:600; text-align:center;">${
+              s.breaker
+            }</td>
+          </tr>
+        `
+          )
+          .join('')}
+      </tbody>
+    `;
+    // Add a title above the table
+    const title = document.createElement('h4');
+    title.textContent = 'Longest Silences';
+    container.appendChild(title);
+    container.appendChild(table);
   }
 });
 
 let lastLoadedMessages = null;
 
 // At the end of DOMContentLoaded
-window.addEventListener('resize', function() {
+window.addEventListener('resize', function () {
   if (lastLoadedMessages) {
-    try { renderActivityOverTime(lastLoadedMessages); } catch (err) { showVizError('viz-activity-over-time', err); }
-    try { renderMessagesByParticipant(lastLoadedMessages); } catch (err) { showVizError('viz-messages-by-participant', err); }
-    try { renderHourlyActivity(lastLoadedMessages); } catch (err) { showVizError('viz-hourly-activity', err); }
-    try { renderLongestStreaks(lastLoadedMessages); } catch (err) { showVizError('viz-longest-streaks', err); }
-    try { renderWeeklyHeatmap(lastLoadedMessages); } catch (err) { showVizError('viz-weekly-heatmap', err); }
-    try { renderEmojiChart(lastLoadedMessages); } catch (err) { showVizError('viz-emojis', err); }
-    try { renderResponseTimeHistogram(lastLoadedMessages); } catch (err) { showVizError('viz-response-time', err); }
-    try { renderMostUsedWords(lastLoadedMessages); } catch (err) { showVizError('viz-most-used-words', err); }
-    try { renderActivityOverTimeGrouped(lastLoadedMessages); } catch (err) { showVizError('viz-activity-over-time-grouped', err); }
-    try { renderActivityOverTimeStackedPercent(lastLoadedMessages); } catch (err) { showVizError('viz-activity-over-time-stacked-percent', err); }
-    try { renderMessageLengthHistogram(lastLoadedMessages); } catch (err) { showVizError('viz-message-length-histogram', err); }
-    try { renderWordCloud(lastLoadedMessages); } catch (err) { showVizError('viz-word-cloud', err); }
+    try {
+      renderActivityOverTime(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-activity-over-time', err);
+    }
+    try {
+      renderMessagesByParticipant(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-messages-by-participant', err);
+    }
+    try {
+      renderHourlyActivity(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-hourly-activity', err);
+    }
+    try {
+      renderLongestStreaks(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-longest-streaks', err);
+    }
+    try {
+      renderWeeklyHeatmap(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-weekly-heatmap', err);
+    }
+    try {
+      renderEmojiChart(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-emojis', err);
+    }
+    try {
+      renderResponseTimeHistogram(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-response-time', err);
+    }
+    try {
+      renderMostUsedWords(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-most-used-words', err);
+    }
+    try {
+      renderActivityOverTimeGrouped(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-activity-over-time-grouped', err);
+    }
+    try {
+      renderActivityOverTimeStackedPercent(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-activity-over-time-stacked-percent', err);
+    }
+    try {
+      renderMessageLengthHistogram(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-message-length-histogram', err);
+    }
+    try {
+      renderLongestSilences(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-longest-silences', err);
+    }
+    try {
+      renderWordCloud(lastLoadedMessages);
+    } catch (err) {
+      showVizError('viz-word-cloud', err);
+    }
   }
-}); 
+});

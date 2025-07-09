@@ -1,5 +1,5 @@
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   background: #f9f9fb;
   color: #222;
   margin: 0;
@@ -11,7 +11,7 @@ header {
   border-bottom: 1px solid #e0e0e0;
   padding: 1.5rem 0;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 main {
   max-width: 70vw;
@@ -26,7 +26,8 @@ section {
   padding: 0;
   margin-bottom: 2.5rem;
 }
-h2, h3 {
+h2,
+h3 {
   margin-top: 0;
   color: #2a6ebb;
 }
@@ -47,7 +48,9 @@ h4 {
 ol {
   padding-left: 1.2rem;
 }
-.upload-placeholder, .summary-placeholder, .visualizations-placeholder {
+.upload-placeholder,
+.summary-placeholder,
+.visualizations-placeholder {
   background: #f0f4fa;
   border: 1.5px dashed #b3c6e0;
   color: #7a8ca3;
@@ -103,6 +106,33 @@ ol {
 #browse-btn:hover {
   background: #00b894;
 }
+#sample-btn {
+  background: #2a6ebb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s;
+}
+#sample-btn:hover {
+  background: #00b894;
+}
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+.or-divider {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
 .upload-status {
   margin-top: 1rem;
   min-height: 1.5em;
@@ -121,10 +151,11 @@ ol {
   justify-content: center;
   margin-top: 1.5rem;
 }
-.summary-card, .participant-summary-card {
+.summary-card,
+.participant-summary-card {
   background: #f0f4fa;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   padding: 1.2rem 1.5rem;
   min-width: 150px;
   text-align: center;
@@ -137,7 +168,8 @@ ol {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-.summary-card strong, .participant-summary-card h4 {
+.summary-card strong,
+.participant-summary-card h4 {
   color: #222;
   font-size: 1.15em;
   display: block;
@@ -161,15 +193,18 @@ ol {
 }
 
 /* Consistent color palette for D3 charts */
-.bar, .bar-hour, .bar-delay {
+.bar,
+.bar-hour,
+.bar-delay {
   fill: #2a6ebb;
 }
 .bar-emoji {
   fill: #00b894;
 }
-.axis path, .axis line {
+.axis path,
+.axis line {
   stroke: #b3c6e0;
-} 
+}
 
 /* Participant summaries styled like skill-category/skills-grid */
 .participant-summaries-container {
@@ -183,7 +218,7 @@ ol {
 .participant-summary-card {
   background: #f0f4fa;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   padding: 1.2rem 1.5rem;
   min-width: 150px;
   text-align: center;
@@ -203,15 +238,8 @@ ol {
   display: flex;
   font-size: 1.5em;
   justify-content: center;
-  font-family:
-    "Twemoji Mozilla",
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol",
-    "Noto Color Emoji",
-    "EmojiOne Color",
-    "Android Emoji",
-    sans-serif;
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
 }
 
 .participant-summary-card .stat-label {
@@ -232,8 +260,28 @@ ol {
 }
 
 .top-words-list {
-  align-items: center;
-  font-size: 1.08em;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--summary-card-gap);
+  padding: 0.5rem 0;
+  max-width: 100%; /* adjust to desired width */
+  margin: 0 auto;
+}
+
+.top-word {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
+}
+
+/* Make emojis larger in the most used emojis row */
+.stat-most-used-emojis + .top-words-list .top-word {
+  font-size: 1.5rem;
+  line-height: 1.2;
 }
 .stat-top-words {
   justify-content: center;
@@ -357,7 +405,7 @@ ol {
   main {
     max-width: 98vw;
   }
-} 
+}
 @media (max-width: 600px) {
   .cs-title {
     font-size: 2.1rem;
@@ -369,7 +417,9 @@ ol {
     margin-bottom: 1.2rem;
     padding: 0 0.5rem;
   }
-  .cs-desc, .cs-privacy, .cs-github-link {
+  .cs-desc,
+  .cs-privacy,
+  .cs-github-link {
     font-size: 1rem;
     max-width: 98vw;
     padding: 0 0.5rem;
@@ -380,7 +430,8 @@ ol {
     margin-bottom: 1.2rem;
     padding: 0 0.5rem;
   }
-  .cs-instructions ol, .cs-limit-notice {
+  .cs-instructions ol,
+  .cs-limit-notice {
     max-width: 98vw;
     font-size: 0.98rem;
     padding-left: 0.7rem;
@@ -390,27 +441,28 @@ ol {
     padding: 0.8rem 0.5rem;
     max-width: 98vw;
   }
-} 
+}
 .hidden-on-load {
   display: none !important;
-} 
+}
 .emoji-text {
-  font-family:
-    "Twemoji Mozilla",
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol",
-    "Noto Color Emoji",
-    "EmojiOne Color",
-    "Android Emoji",
-    sans-serif;
-} 
-.privacy-desktop { display: block; }
-.privacy-mobile { display: none; }
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
+}
+.privacy-desktop {
+  display: block;
+}
+.privacy-mobile {
+  display: none;
+}
 @media (max-width: 900px) {
-  .privacy-desktop { display: none; }
-  .privacy-mobile { display: block; }
-} 
+  .privacy-desktop {
+    display: none;
+  }
+  .privacy-mobile {
+    display: block;
+  }
+}
 /* Instructions card styling */
 .cs-instructions-card {
   background: #f0f4fa;
@@ -419,7 +471,7 @@ ol {
   padding: 2rem 1.5rem 1.5rem 1.5rem;
   margin: 0 auto 2.5rem auto;
   max-width: 600px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   text-align: left;
   font-size: 1.12rem;
   color: #222;
@@ -457,7 +509,7 @@ ol {
   .cs-instructions-card ol {
     font-size: 0.98rem;
   }
-} 
+}
 .cs-instructions-note {
   margin-top: 1.5em;
   color: #888;
@@ -467,4 +519,7 @@ ol {
   border: none;
   background: none;
   padding: 0;
-} 
+}
+:root {
+  --summary-card-gap: 0rem;
+}
