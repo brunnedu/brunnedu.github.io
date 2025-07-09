@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsStats</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-53X6D6WZQY"></script>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <link rel="icon" type="image/png" href="assets/WhatsStats_favicon.png" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="desktop-note mobile-only">
+      <b>Note:</b> This app was developed for desktop usage.
+    </div>
+    <header class="cs-header">
+      <img
+        src="assets/WhatsStats_logo.png"
+        alt="WhatsStats Logo"
+        class="cs-title"
+        style="
+          max-width: 320px;
+          width: 100%;
+          height: auto;
+          display: block;
+          margin: 0 auto 0.8rem auto;
+        "
+      />
+      <div class="cs-desc">
+        <b>WhatsStats</b> lets you upload your exported WhatsApp chat and instantly explore fun,
+        interactive stats about your conversations.
+      </div>
+      <div class="cs-privacy">
+        <span class="privacy-desktop"
+          >All processing happens in your browser. Your data is never uploaded or stored.</span
+        >
+        <span class="privacy-mobile"
+          >All processing happens in your browser.<br />Your data is never uploaded or stored.</span
+        >
+      </div>
+    </header>
+    <main>
+      <section id="instructions" class="cs-instructions">
+        <div class="cs-instructions-card">
+          <h2>How to Use WhatsStats</h2>
+          <ol>
+            <li>Open the WhatsApp chat you want to analyze.</li>
+            <li>Scroll up to load more message history.</li>
+            <li>
+              <strong>Android:</strong> Tap the three-dot menu (⋮).<br /><strong>iPhone:</strong>
+              Tap the contact/group name.
+            </li>
+            <li>Select "More" → "Export Chat".</li>
+            <li>Choose "Without Media".</li>
+            <li>Select WhatsApp and send to yourself.</li>
+            <li>Log into <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a>.</li>
+            <li>Download the file you sent yourself.</li>
+            <li>Unzip it and upload the .txt file below!</li>
+          </ol>
+          <div class="cs-instructions-note">
+            <strong>Note:</strong> WhatsApp exports are limited to ~40,000 messages per file
+          </div>
+        </div>
+      </section>
+      <section id="file-upload" class="cs-upload">
+        <div id="upload-area" class="upload-area">
+          <input type="file" id="file-input" accept=".txt" style="display: none" />
+          <div class="button-container">
+            <button id="sample-btn" type="button">Try Sample Chat</button>
+            <div class="or-divider">or</div>
+            <button id="browse-btn" type="button">Upload Your Chat</button>
+          </div>
+          <p>drag & drop your WhatsApp chat file</p>
+        </div>
+      </section>
+      <section id="summary" class="hidden-on-load">
+        <h3>Chat Summary</h3>
+        <!-- Summary cards will be rendered here directly by JS -->
+      </section>
+      <section id="participant-summary-section" class="hidden-on-load">
+        <h3>Participant Activity Summaries</h3>
+        <div id="participant-summaries" class="participant-summaries-container"></div>
+      </section>
+      <section id="visualizations" class="hidden-on-load">
+        <h3>Visualizations</h3>
+        <div style="margin-bottom: 2.5rem">
+          <h4 style="margin-bottom: 1.2rem; color: #2a6ebb">Overall Chat Visualizations</h4>
+          <div id="viz-activity-over-time" class="visualizations-placeholder">
+            [Message Activity Over Time]
+          </div>
+          <div id="viz-weekly-heatmap" class="visualizations-placeholder">
+            [Weekly Pattern Heatmap]
+          </div>
+          <div id="viz-emojis" class="visualizations-placeholder">[Most Used Emojis]</div>
+          <div id="viz-word-cloud" class="visualizations-placeholder">[Word Cloud]</div>
+          <div id="viz-most-used-words" class="visualizations-placeholder">
+            [Most Used Words/Phrases]
+          </div>
+          <div id="viz-message-length-histogram" class="visualizations-placeholder">
+            [Histogram of Message Lengths]
+          </div>
+          <div id="viz-longest-silences" class="visualizations-placeholder">[Longest Silences]</div>
+        </div>
+        <div>
+          <h4 style="margin-bottom: 1.2rem; color: #2a6ebb">
+            Participant Breakdown Visualizations
+          </h4>
+          <div id="viz-longest-streaks" class="visualizations-placeholder">
+            [Longest Streak by Participant]
+          </div>
+          <div id="viz-activity-over-time-grouped" class="visualizations-placeholder">
+            [Activity Over Time by Participant]
+          </div>
+          <div id="viz-activity-over-time-stacked-percent" class="visualizations-placeholder">
+            [Activity Over Time by Participant (Stacked)]
+          </div>
+          <div id="viz-hourly-activity" class="visualizations-placeholder">
+            [Hourly Activity Distribution]
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>

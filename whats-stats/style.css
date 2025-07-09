@@ -1,0 +1,525 @@
+body {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: #f9f9fb;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1.5rem 0;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+main {
+  max-width: 70vw;
+  min-width: 320px;
+  margin: 0 auto 2rem auto;
+  padding: 0 1rem;
+}
+section {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 2.5rem;
+}
+h2,
+h3 {
+  margin-top: 0;
+  color: #2a6ebb;
+}
+h3 {
+  font-size: 2rem;
+  text-align: center;
+  margin-top: 2.2rem;
+  margin-bottom: 1.1rem;
+  color: #2a6ebb;
+}
+h4 {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-top: 1.2rem;
+  margin-bottom: 0.7rem;
+  color: #2a6ebb;
+}
+ol {
+  padding-left: 1.2rem;
+}
+.upload-placeholder,
+.summary-placeholder,
+.visualizations-placeholder {
+  background: #f0f4fa;
+  border: 1.5px dashed #b3c6e0;
+  color: #7a8ca3;
+  border-radius: 6px;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.visualizations-placeholder {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 220px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.upload-area {
+  background: #f0f4fa;
+  border: 2px dashed #2a6ebb;
+  border-radius: 8px;
+  padding: 1.3rem 1.2rem;
+  text-align: center;
+  margin-top: 1rem;
+  transition: border-color 0.2s;
+  cursor: pointer;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.upload-area.dragover {
+  border-color: #00b894;
+  background: #e6f7ef;
+}
+.upload-area.success {
+  border-color: #00b894;
+  background: #e6f7ef;
+}
+#browse-btn {
+  background: #2a6ebb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s;
+}
+#browse-btn:hover {
+  background: #00b894;
+}
+#sample-btn {
+  background: #2a6ebb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s;
+}
+#sample-btn:hover {
+  background: #00b894;
+}
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+.or-divider {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+.upload-status {
+  margin-top: 1rem;
+  min-height: 1.5em;
+  font-size: 1rem;
+  color: #d63031;
+  text-align: center;
+}
+.upload-status.success {
+  /* Remove green color for success, handled by upload area now */
+}
+
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.summary-card,
+.participant-summary-card {
+  background: #f0f4fa;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 1.2rem 1.5rem;
+  min-width: 150px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #2a6ebb;
+  font-weight: 500;
+  border: 1.5px solid #e0eaf6;
+  margin: 0;
+  display: block;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.summary-card strong,
+.participant-summary-card h4 {
+  color: #222;
+  font-size: 1.15em;
+  display: block;
+  margin-bottom: 0.5em;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.visualizations-placeholder .js-plotly-plot,
+.visualizations-placeholder svg,
+.visualizations-placeholder canvas {
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+/* D3 chart tick label font size */
+.tick text {
+  font-size: 1.1rem;
+  fill: #2a6ebb;
+}
+
+/* Consistent color palette for D3 charts */
+.bar,
+.bar-hour,
+.bar-delay {
+  fill: #2a6ebb;
+}
+.bar-emoji {
+  fill: #00b894;
+}
+.axis path,
+.axis line {
+  stroke: #b3c6e0;
+}
+
+/* Participant summaries styled like skill-category/skills-grid */
+.participant-summaries-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+  margin: 2rem 0 2.5rem 0;
+}
+
+.participant-summary-card {
+  background: #f0f4fa;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 1.2rem 1.5rem;
+  min-width: 150px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #2a6ebb;
+  font-weight: 500;
+  border: 1.5px solid #e0eaf6;
+}
+
+.participant-summary-card h4 {
+  margin: 0 0 0.7em 0;
+  font-size: 1.2em;
+  color: #2a6ebb;
+}
+
+.participant-summary-card .emoji-list {
+  display: flex;
+  font-size: 1.5em;
+  justify-content: center;
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
+}
+
+.participant-summary-card .stat-label {
+  color: #222;
+  font-weight: 600;
+  margin-right: 0.3em;
+}
+
+.participant-summary-card .stat-row {
+  margin-bottom: 0.4em;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  justify-content: center;
+}
+
+.top-words-list {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--summary-card-gap);
+  padding: 0.5rem 0;
+  max-width: 100%; /* adjust to desired width */
+  margin: 0 auto;
+}
+
+.top-word {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
+}
+
+/* Make emojis larger in the most used emojis row */
+.stat-most-used-emojis + .top-words-list .top-word {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+.stat-top-words {
+  justify-content: center;
+}
+
+/* Modern ChatStats landing page styles */
+.desktop-note {
+  width: 100vw;
+  background: #fffbe6;
+  color: #b8860b;
+  text-align: center;
+  font-size: 1.05rem;
+  padding: 0.7rem 0 0.5rem 0;
+  border-bottom: 1px solid #ffe58f;
+  letter-spacing: 0.01em;
+  display: none;
+}
+.mobile-only {
+  display: block;
+}
+@media (min-width: 901px) {
+  .mobile-only {
+    display: none;
+  }
+}
+.cs-header {
+  margin-top: 2.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.cs-title {
+  font-size: 5.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2a6ebb;
+  margin-bottom: 0.8rem;
+}
+.cs-desc {
+  font-size: 1.25rem;
+  color: #222;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cs-privacy {
+  font-size: 1.05rem;
+  color: #2a6ebb;
+  opacity: 0.7;
+  margin-top: 0.6rem;
+  font-weight: 400;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cs-github-link {
+  margin-top: 0.6rem;
+  font-size: 1.05rem;
+  color: #2a6ebb;
+  opacity: 0.7;
+  font-weight: 400;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cs-github-link a {
+  color: #2a6ebb;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.cs-github-link a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+.cs-instructions {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.cs-instructions h2 {
+  color: #2a6ebb;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.3rem;
+}
+.cs-instructions ol {
+  display: inline-block;
+  text-align: left;
+  font-size: 1.12rem;
+  color: #444;
+  margin: 0 auto 1.5rem auto;
+  padding-left: 1.2rem;
+  max-width: 500px;
+}
+.cs-limit-notice {
+  display: block;
+  background: #f0f4fa;
+  color: #2a6ebb;
+  padding: 0.8rem 1.5rem;
+  border: 2px dashed #2a6ebb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 auto;
+  max-width: 500px;
+  text-align: center;
+}
+.cs-limit-notice span {
+  display: inline-block;
+}
+.cs-upload {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+#upload-area {
+  margin-top: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+@media (max-width: 900px) {
+  main {
+    max-width: 98vw;
+  }
+}
+@media (max-width: 600px) {
+  .cs-title {
+    font-size: 2.1rem;
+    word-break: break-word;
+    padding: 0 0.5rem;
+  }
+  .cs-header {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+    padding: 0 0.5rem;
+  }
+  .cs-desc,
+  .cs-privacy,
+  .cs-github-link {
+    font-size: 1rem;
+    max-width: 98vw;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+  .cs-instructions {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+    padding: 0 0.5rem;
+  }
+  .cs-instructions ol,
+  .cs-limit-notice {
+    max-width: 98vw;
+    font-size: 0.98rem;
+    padding-left: 0.7rem;
+    box-sizing: border-box;
+  }
+  .upload-area {
+    padding: 0.8rem 0.5rem;
+    max-width: 98vw;
+  }
+}
+.hidden-on-load {
+  display: none !important;
+}
+.emoji-text {
+  font-family: 'Twemoji Mozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'EmojiOne Color', 'Android Emoji', sans-serif;
+}
+.privacy-desktop {
+  display: block;
+}
+.privacy-mobile {
+  display: none;
+}
+@media (max-width: 900px) {
+  .privacy-desktop {
+    display: none;
+  }
+  .privacy-mobile {
+    display: block;
+  }
+}
+/* Instructions card styling */
+.cs-instructions-card {
+  background: #f0f4fa;
+  border: 2px dashed #2a6ebb;
+  border-radius: 8px;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  margin: 0 auto 2.5rem auto;
+  max-width: 600px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  text-align: left;
+  font-size: 1.12rem;
+  color: #222;
+}
+.cs-instructions-card h2 {
+  color: #2a6ebb;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+.cs-instructions-card ol {
+  margin: 0 0 0.5rem 1.2rem;
+  padding-left: 1.2rem;
+  color: #444;
+  font-size: 1.08rem;
+}
+.cs-instructions-card .cs-limit-notice {
+  margin-top: 1.5em;
+  margin-bottom: 0;
+  border: 2px dashed #00b894;
+  color: #00b894;
+  background: #e6f7ef;
+}
+@media (max-width: 600px) {
+  .cs-instructions-card {
+    padding: 1.1rem 0.5rem 1.1rem 0.5rem;
+    max-width: 98vw;
+    font-size: 0.98rem;
+  }
+  .cs-instructions-card h2 {
+    font-size: 1.1rem;
+  }
+  .cs-instructions-card ol {
+    font-size: 0.98rem;
+  }
+}
+.cs-instructions-note {
+  margin-top: 1.5em;
+  color: #888;
+  font-size: 0.98em;
+  font-style: italic;
+  text-align: center;
+  border: none;
+  background: none;
+  padding: 0;
+}
+:root {
+  --summary-card-gap: 0rem;
+}
