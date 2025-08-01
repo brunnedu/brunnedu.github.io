@@ -452,17 +452,6 @@ ol {
 .privacy-desktop {
   display: block;
 }
-.privacy-mobile {
-  display: none;
-}
-@media (max-width: 900px) {
-  .privacy-desktop {
-    display: none;
-  }
-  .privacy-mobile {
-    display: block;
-  }
-}
 /* Instructions card styling */
 .cs-instructions-card {
   background: #f0f4fa;
