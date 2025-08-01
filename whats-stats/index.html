@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
   </head>
   <body>
     <div class="desktop-note mobile-only">
@@ -36,9 +37,6 @@
       </div>
       <div class="cs-privacy">
         <span class="privacy-desktop"
-          >All processing happens in your browser. Your data is never uploaded or stored.</span
-        >
-        <span class="privacy-mobile"
           >All processing happens in your browser.<br />Your data is never uploaded or stored.</span
         >
       </div>
@@ -96,6 +94,9 @@
             [Weekly Pattern Heatmap]
           </div>
           <div id="viz-emojis" class="visualizations-placeholder">[Most Used Emojis]</div>
+          <div id="viz-emoji-trends" class="visualizations-placeholder">
+            [Emoji Trends Over Time]
+          </div>
           <div id="viz-word-cloud" class="visualizations-placeholder">[Word Cloud]</div>
           <div id="viz-most-used-words" class="visualizations-placeholder">
             [Most Used Words/Phrases]
