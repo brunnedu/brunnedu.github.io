@@ -92,14 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add pulse animation to name after it appears (mobile-optimized)
-    setTimeout(() => {
-        const nameElement = document.querySelector('.name');
-        if (nameElement && !isMobile()) {
-            nameElement.style.animation = 'pulse 2s ease-in-out infinite';
-        }
-    }, heroElements.length * animationDelay + 500);
-
     // ===== SCROLL ARROW FUNCTIONALITY =====
     const scrollArrow = document.getElementById('scroll-arrow');
     if (scrollArrow) {
@@ -127,20 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const particleConfig = {
             "particles": {
                 "number": {
-                    "value": isMobile() ? 45 : 60, // Fewer particles on mobile
+                    "value": isMobile() ? 60 : 90, // Fewer particles on mobile
                     "density": {
                         "enable": true,
                         "value_area": 800
                     }
                 },
-                "color": {
-                    "value": ["#0984e3", "#00b894"]
-                },
                 "shape": {
                     "type": "circle",
                     "stroke": {
                         "width": 0,
-                        "color": "#000000"
+                        "color": "#0048AA"
                     }
                 },
                 "opacity": {
@@ -154,9 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 "line_linked": {
                     "enable": true,
                     "distance": isMobile() ? 100 : 200, // Shorter connections on mobile
-                    "color": "#00b894",
+                    "color": "#777",
                     "opacity": 0.4,
-                    "width": 1
+                    "width": 0.5
                 },
                 "move": {
                     "enable": true,
@@ -173,10 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 "events": {
                     "onhover": {
                         "enable": !isMobile(), // Disable hover on mobile for better performance
-                        "mode": "repulse"
+                        "mode": "grab"
                     },
                     "onclick": {
-                        "enable": true,
+                        "enable": false,
                         "mode": "push"
                     },
                     "resize": true
