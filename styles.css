@@ -11,7 +11,7 @@
 :root {
   --primary-color: #2d3436;
   --secondary-color: #000000;
-  --accent-color: #838383;
+  --accent-color: #595959;
   --text-color: #2d3436;
   --card-bg: rgba(255, 255, 255, 0.9);
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -48,8 +48,9 @@ body {
   background-image: radial-gradient(circle at 25px 25px, rgba(0, 0, 0, 0.05) 2%, transparent 0%),
     radial-gradient(circle at 75px 75px, rgba(0, 0, 0, 0.05) 2%, transparent 0%);
   background-size: 100px 100px;
-  padding: 4rem 0;
+  padding: 0 0;
   position: relative;
+  transform: translateY(-3rem);
 }
 
 .hero-content {
@@ -58,7 +59,7 @@ body {
   align-items: center;
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 0;
+  padding: 0 0;
 }
 
 /* Hero animations */
@@ -196,7 +197,7 @@ body {
 /* Scroll arrow */
 .scroll-arrow {
   position: absolute;
-  bottom: 2rem;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 50px;
@@ -212,6 +213,7 @@ body {
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
   opacity: 0;
+  z-index: 1000;
 }
 
 .scroll-arrow:hover {
@@ -528,7 +530,7 @@ body > *:not(#particles-js) {
   margin: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 470px) {
   .container {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -561,7 +563,7 @@ body > *:not(#particles-js) {
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 365px) {
   .hero {
     min-height: 100dvh;
     padding: 1rem 0 0.5rem 0;
