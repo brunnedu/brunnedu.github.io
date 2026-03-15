@@ -1,0 +1,181 @@
+import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN } from '../utils.js';
+import { countEmojiOccurrences } from '../analysis.js';
+
+function withVariationSelector(emoji) {
+  const legacy = [
+    '\u263A',
+    '\u2665',
+    '\u2660',
+    '\u2663',
+    '\u2666',
+    '\u2600',
+    '\u2601',
+    '\u2602',
+    '\u2603',
+    '\u260E',
+    '\u2614',
+    '\u2615',
+    '\u2648',
+    '\u2649',
+    '\u264A',
+    '\u264B',
+    '\u264C',
+    '\u264D',
+    '\u264E',
+    '\u264F',
+    '\u2650',
+    '\u2651',
+    '\u2652',
+    '\u2653',
+  ];
+  if (
+    emoji.length === 1 &&
+    legacy.includes('\\u' + emoji.charCodeAt(0).toString(16).toUpperCase())
+  ) {
+    return emoji + '\uFE0F';
+  }
+  if (emoji === '☺') return '\u263A\uFE0F';
+  if (emoji === '♥') return '\u2665\uFE0F';
+  return emoji;
+}
+
+export function renderEmojiChart(messages) {
+  const container = document.getElementById('viz-emojis');
+  container.innerHTML = '';
+  const emojiCounts = countEmojiOccurrences(messages);
+  const data = Object.entries(emojiCounts)
+    .map(([emoji, count]) => ({ emoji: withVariationSelector(emoji), count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 20);
+  if (data.length === 0) {
+    container.textContent = 'No emojis found.';
+    return;
+  }
+  const trace = {
+    x: data.map((d) => d.emoji),
+    y: data.map((d) => d.count),
+    type: 'bar',
+    marker: { color: '#2a6ebb' },
+    hovertemplate: '%{y}<br>%{x} uses<extra></extra>',
+  };
+  const layout = {
+    title: { text: 'Most Used Emojis', font: { size: PLOTLY_TITLE_SIZE } },
+    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 80 },
+    xaxis: {
+      title: 'Emoji',
+      tickfont: { size: 24 },
+      automargin: true,
+    },
+    yaxis: {
+      title: 'Count',
+      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      automargin: true,
+    },
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    showlegend: false,
+    width: container.offsetWidth,
+    height: 340,
+  };
+  Plotly.newPlot(container, [trace], layout, { responsive: true });
+}
+
+export function renderEmojiTrends(messages) {
+  const container = document.getElementById('viz-emoji-trends');
+  container.innerHTML = '';
+
+  const emojiCounts = countEmojiOccurrences(messages);
+  const topEmojis = Object.entries(emojiCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([emoji]) => emoji);
+
+  if (topEmojis.length === 0) {
+    container.textContent = 'No emojis found.';
+    return;
+  }
+
+  const monthCountsByEmoji = {};
+  topEmojis.forEach((emoji) => {
+    monthCountsByEmoji[emoji] = {};
+  });
+
+  const emojiRegex = /\p{Extended_Pictographic}/gu;
+  const genderSigns = ['\u2640', '\u2642', '\u2640\uFE0F', '\u2642\uFE0F', '♀', '♂', '♀️', '♂️'];
+
+  messages.forEach((m) => {
+    const date = new Date(m.timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const monthStr = `${year}-${month}`;
+
+    const emojis = Array.from(m.message.matchAll(emojiRegex), (m) => m[0]);
+
+    emojis.forEach((emoji) => {
+      if (genderSigns.includes(emoji)) return;
+      if (topEmojis.includes(emoji)) {
+        monthCountsByEmoji[emoji][monthStr] = (monthCountsByEmoji[emoji][monthStr] || 0) + 1;
+      }
+    });
+  });
+
+  const allMonths = Array.from(
+    new Set(Object.values(monthCountsByEmoji).flatMap((obj) => Object.keys(obj)))
+  ).sort();
+
+  if (allMonths.length === 0) {
+    container.textContent = 'No emoji usage data to display.';
+    return;
+  }
+
+  const emojiColors = [
+    '#2a6ebb',
+    '#00b894',
+    '#0984e3',
+    '#00cec9',
+    '#6c5ce7',
+    '#fdcb6e',
+    '#e17055',
+    '#636e72',
+    '#fd79a8',
+    '#fdcb6e',
+  ];
+
+  const traces = topEmojis.map((emoji, idx) => ({
+    x: allMonths,
+    y: allMonths.map((month) => monthCountsByEmoji[emoji][month] || 0),
+    name: emoji,
+    type: 'scatter',
+    mode: 'lines+markers',
+    marker: { color: emojiColors[idx % emojiColors.length] },
+    line: { color: emojiColors[idx % emojiColors.length], width: 3 },
+    hovertemplate: `${emoji}<br>Month %{x}<br>%{y} uses<extra></extra>`,
+  }));
+
+  const layout = {
+    title: {
+      text: 'Top 10 Emojis - Usage Trends Over Time',
+      font: { size: PLOTLY_TITLE_SIZE },
+    },
+    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
+    xaxis: {
+      title: 'Month',
+      tickangle: -30,
+      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      automargin: true,
+      type: 'category',
+      nticks: Math.min(12, allMonths.length),
+    },
+    yaxis: {
+      title: 'Usage Count',
+      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      automargin: true,
+    },
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    width: container.offsetWidth,
+    height: 500,
+  };
+
+  Plotly.newPlot(container, traces, layout, { responsive: true });
+}
