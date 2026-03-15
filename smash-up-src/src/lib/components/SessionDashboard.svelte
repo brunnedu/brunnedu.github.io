@@ -3,6 +3,8 @@
   import { setMatchScore } from '../stores.js';
   import MatchCard from './MatchCard.svelte';
   import ScoreEntry from './ScoreEntry.svelte';
+  import Standings from './Standings.svelte';
+  import ExportButton from './ExportButton.svelte';
 
   const totalMatches = $derived($sessionStore.matches.length);
   const playedCount = $derived(
@@ -18,6 +20,7 @@
     $sessionStore.matches.filter((m) => !m.sets || !m.winner).slice(1, 4)
   );
   const bestOf = $derived($sessionStore.bestOf);
+  const canExport = $derived(playedCount >= 1);
 
   function handleSaveScore(sets, winner) {
     if (!currentMatch) return;
@@ -27,9 +30,15 @@
 
 <section class="session-dashboard">
   <div class="session-header">
-    <h2 class="section-title">
-      Game {currentMatch ? playedCount + 1 : playedCount} / {totalMatches}
-    </h2>
+    <div class="session-header-top">
+      <h2 class="section-title">
+        Game {currentMatch ? playedCount + 1 : playedCount} / {totalMatches}
+      </h2>
+      <ExportButton
+        session={$sessionStore}
+        disabled={!canExport}
+      />
+    </div>
     <div class="progress-bar">
       <div
         class="progress-fill"
@@ -65,4 +74,6 @@
   {:else}
     <p class="muted">No matches played yet.</p>
   {/if}
+
+  <Standings matches={$sessionStore.matches} players={$sessionStore.players} />
 </section>

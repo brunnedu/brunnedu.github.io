@@ -263,6 +263,42 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.session-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.session-header-top .section-title {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.btn-export {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-export:hover:not(:disabled) {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .progress-bar {
   height: 8px;
   background: var(--border);
@@ -416,4 +452,47 @@ body {
 
 .btn-save {
   margin-top: 0.75rem;
+}
+
+/* Standings */
+.standings {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+}
+
+.standings-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.standings-table td:first-child,
+.standings-table th:first-child {
+  width: 2rem;
+  text-align: center;
+}
+
+.standings-table td:nth-child(n + 3),
+.standings-table th:nth-child(n + 3) {
+  text-align: center;
+  width: 2.5rem;
+}
+
+.standings-table tbody tr:nth-child(even) {
+  background: var(--accent-bg);
 }
