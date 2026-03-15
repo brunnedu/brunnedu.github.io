@@ -518,51 +518,50 @@ function renderLongestStreaks(messages) {
   Plotly.newPlot(container, traces, layout, { responsive: true });
 }
 
-// Plotly Visualization: Weekly Pattern Heatmap
+// Plotly Visualization: Weekly Pattern Heatmap (calendar-style: days on x, hours on y)
 function renderWeeklyHeatmap(messages) {
   const container = document.getElementById('viz-weekly-heatmap');
   container.innerHTML = '';
-  // Prepare data: count messages by day of week and hour
-  const heatmap = Array.from({ length: 7 }, () => Array(24).fill(0));
+  // Build heatmap: rows = hours (0-23), cols = days (Mon=0 ... Sun=6)
+  const heatmap = Array.from({ length: 24 }, () => Array(7).fill(0));
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   messages.forEach((m) => {
     const date = new Date(m.timestamp);
-    const day = date.getDay();
+    const dayIndex = (date.getDay() + 6) % 7; // Sun=0->6, Mon=1->0, etc.
     const hour = date.getHours();
-    heatmap[day][hour]++;
+    heatmap[hour][dayIndex]++;
   });
-  const z = heatmap;
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const hours = Array.from({ length: 24 }, (_, i) => i);
   const trace = {
-    z: z,
-    x: hours,
-    y: days,
+    z: heatmap,
+    x: days,
+    y: Array.from({ length: 24 }, (_, i) => i),
     type: 'heatmap',
     colorscale: 'YlGnBu',
     hoverongaps: false,
     colorbar: { title: 'Messages' },
-    hovertemplate: '%{y}, %{x}:00<br>%{z} messages<extra></extra>',
+    hovertemplate: '%{x}, %{y}:00 — %{z} messages<extra></extra>',
   };
   const layout = {
     title: { text: 'Weekly Pattern', font: { size: PLOTLY_TITLE_SIZE } },
     margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 60 },
     xaxis: {
-      title: 'Hour',
-      tickmode: 'array',
-      tickvals: [0, 4, 8, 12, 16, 20, 23],
-      ticktext: ['0', '4', '8', '12', '16', '20', '23'],
+      title: 'Day',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
     },
     yaxis: {
-      title: 'Day',
+      title: 'Hour',
+      autorange: 'reversed',
+      tickmode: 'array',
+      tickvals: [0, 6, 12, 18, 23],
+      ticktext: ['00', '06', '12', '18', '23'],
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 340,
+    height: 420,
   };
   Plotly.newPlot(container, [trace], layout, { responsive: true });
 }
