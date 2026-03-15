@@ -60,3 +60,5 @@ build/
 # GitHub actions
 .github/
 
+# Dev notes and implementation plans
+dev/
