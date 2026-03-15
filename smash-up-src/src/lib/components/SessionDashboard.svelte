@@ -1,5 +1,8 @@
 <script>
   import { sessionStore } from '../stores.js';
+  import { setMatchScore } from '../stores.js';
+  import MatchCard from './MatchCard.svelte';
+  import ScoreEntry from './ScoreEntry.svelte';
 
   const totalMatches = $derived($sessionStore.matches.length);
   const playedCount = $derived(
@@ -14,12 +17,18 @@
   const upcomingMatches = $derived(
     $sessionStore.matches.filter((m) => !m.sets || !m.winner).slice(1, 4)
   );
+  const bestOf = $derived($sessionStore.bestOf);
+
+  function handleSaveScore(sets, winner) {
+    if (!currentMatch) return;
+    setMatchScore(currentMatch.game, sets, winner);
+  }
 </script>
 
 <section class="session-dashboard">
   <div class="session-header">
     <h2 class="section-title">
-      Game {playedCount + 1} / {totalMatches}
+      Game {currentMatch ? playedCount + 1 : playedCount} / {totalMatches}
     </h2>
     <div class="progress-bar">
       <div
@@ -32,10 +41,8 @@
   {#if currentMatch}
     <div class="current-match card">
       <h3>Now Playing</h3>
-      <p class="matchup">
-        {currentMatch.teamA.join(' & ')} vs {currentMatch.teamB.join(' & ')}
-      </p>
-      <p class="score-placeholder">[Score entry — Phase 4]</p>
+      <MatchCard match={currentMatch} />
+      <ScoreEntry bestOf={bestOf} onSave={handleSaveScore} />
     </div>
   {/if}
 
@@ -43,9 +50,7 @@
     <div class="upcoming">
       <h3>Up Next</h3>
       {#each upcomingMatches as match}
-        <p class="matchup muted">
-          {match.game}. {match.teamA.join(' & ')} vs {match.teamB.join(' & ')}
-        </p>
+        <MatchCard match={match} compact />
       {/each}
     </div>
   {/if}
@@ -54,10 +59,7 @@
     <div class="completed">
       <h3>Completed</h3>
       {#each completedMatches as match}
-        <p class="matchup">
-          ✓ {match.teamA.join(' & ')} {match.sets?.[0]?.scoreA ?? '?'}–
-          {match.sets?.[0]?.scoreB ?? '?'} {match.teamB.join(' & ')}
-        </p>
+        <MatchCard match={match} winner={match.winner} compact />
       {/each}
     </div>
   {:else}

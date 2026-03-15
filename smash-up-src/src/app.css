@@ -319,3 +319,101 @@ body {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+/* Match Card */
+.match-card {
+  padding: 0.5rem 0;
+}
+
+.match-card.compact {
+  padding: 0.25rem 0;
+}
+
+.match-teams {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1rem;
+}
+
+.match-teams .vs {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0.2rem;
+}
+
+.match-teams .team {
+  font-weight: 500;
+}
+
+.match-card.winner-a .team-a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.match-card.winner-b .team-b {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.match-score {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.match-card.compact .match-score {
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.set-score {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Score Entry */
+.score-entry {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-row input {
+  width: 4rem;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.score-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.score-sep {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.set-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+.btn-save {
+  margin-top: 0.75rem;
+}
