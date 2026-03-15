@@ -1,19 +1,12 @@
 <script>
-  import Landing from './lib/components/Landing.svelte';
-  import PlayerInput from './lib/components/PlayerInput.svelte';
+  import SetupScreen from './lib/components/SetupScreen.svelte';
   import SessionDashboard from './lib/components/SessionDashboard.svelte';
   import { initSession } from './lib/stores.js';
   import { generateAllMatchups, scheduleFairRotation } from './lib/scheduler.js';
 
-  let screen = $state('landing');
+  let screen = $state('setup');
   let players = $state([]);
   let bestOf = $state(false);
-
-  function handleStart() {
-    screen = 'player-input';
-    players = [];
-    bestOf = false;
-  }
 
   function handleGenerateSchedule() {
     const matchups = generateAllMatchups(players);
@@ -23,20 +16,15 @@
   }
 </script>
 
-{#if screen === 'landing'}
-  <Landing onStart={handleStart} />
-{:else if screen === 'player-input'}
-  <PlayerInput
+{#if screen === 'setup'}
+  <SetupScreen
     bind:players
     bind:bestOf
     onGenerateSchedule={handleGenerateSchedule}
   />
-  <button type="button" class="btn-back" onclick={() => (screen = 'landing')}>
-    ← Back
-  </button>
-{:else if screen === 'session'}
+{:else}
   <SessionDashboard />
-  <button type="button" class="btn-back" onclick={() => (screen = 'landing')}>
+  <button type="button" class="btn-back" onclick={() => (screen = 'setup')}>
     ← Back
   </button>
 {/if}

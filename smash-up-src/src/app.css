@@ -34,28 +34,27 @@ body {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* Landing */
-.landing {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80svh;
+/* Setup screen (hero + player input) */
+.setup-screen {
+  padding: 0 0 1rem;
+}
+
+.setup-hero {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem 1.25rem;
 }
 
 .landing-title {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 700;
   color: var(--accent);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.35rem;
 }
 
 .landing-tagline {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-muted);
-  margin: 0 0 2rem;
+  margin: 0;
 }
 
 /* Buttons - min 44px touch target (WCAG 2.5.5) */
@@ -550,9 +549,8 @@ body {
 }
 
 @media (max-height: 500px) {
-  .landing {
-    min-height: 60svh;
-    padding: 1.5rem 1rem;
+  .setup-hero {
+    padding: 1rem;
   }
 
   .landing-title {
