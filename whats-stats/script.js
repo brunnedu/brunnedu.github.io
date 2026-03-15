@@ -1398,7 +1398,7 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
     } else {
       uploadArea.innerHTML = `
-        <input type="file" id="file-input" accept=".txt" style="display: none" />
+        <input type="file" id="file-input" accept=".txt,.zip" style="display: none" />
         <div class="button-container">
           <button id="sample-btn" type="button">Try Sample Chat</button>
           <div class="or-divider">or</div>
@@ -1820,21 +1820,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Core file handler
   function handleFile(file) {
-    if (!file.name.endsWith('.txt')) {
-      setStatus('Please upload a .txt file exported from WhatsApp.');
+    const isZip = file.name.toLowerCase().endsWith('.zip');
+    const isTxt = file.name.toLowerCase().endsWith('.txt');
+    if (!isTxt && !isZip) {
+      setStatus('Please upload a .txt or .zip file exported from WhatsApp.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      // 5MB limit
-      setStatus('File is too large. Please upload a file smaller than 5MB.');
+    const maxSize = isZip ? 15 * 1024 * 1024 : 5 * 1024 * 1024; // 15MB for zip, 5MB for txt
+    if (file.size > maxSize) {
+      setStatus(`File is too large. Please upload a file smaller than ${isZip ? '15' : '5'}MB.`);
       return;
     }
-    setStatus('Reading file...', true);
-    const reader = new FileReader();
-    reader.onload = function (e) {
+
+    function processChatText(text) {
       setStatus('Parsing chat...', true);
-      const text = e.target.result;
-      fileText = e.target.result;
+      fileText = text;
       let messages = [];
       try {
         messages = parseWhatsAppChat(text);
@@ -1917,11 +1917,45 @@ document.addEventListener('DOMContentLoaded', function () {
       } catch (err) {
         showVizError('viz-longest-silences', err);
       }
-    };
-    reader.onerror = function () {
-      setStatus('Error reading file. Please try again.');
-    };
-    reader.readAsText(file);
+    }
+
+    if (isZip) {
+      setStatus('Extracting zip...', true);
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        JSZip.loadAsync(e.target.result)
+          .then(function (zip) {
+            const txtFiles = Object.keys(zip.files).filter(
+              (name) => name.toLowerCase().endsWith('.txt') && !zip.files[name].dir
+            );
+            if (txtFiles.length === 0) {
+              setStatus('No .txt file found inside the zip. Please check your export.');
+              return;
+            }
+            return zip.files[txtFiles[0]].async('string');
+          })
+          .then(function (text) {
+            if (text) processChatText(text);
+          })
+          .catch(function (err) {
+            setStatus('Error reading zip: ' + (err && err.message ? err.message : 'Invalid or corrupted zip.'));
+          });
+      };
+      reader.onerror = function () {
+        setStatus('Error reading file. Please try again.');
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      setStatus('Reading file...', true);
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        processChatText(e.target.result);
+      };
+      reader.onerror = function () {
+        setStatus('Error reading file. Please try again.');
+      };
+      reader.readAsText(file);
+    }
   }
 });
 

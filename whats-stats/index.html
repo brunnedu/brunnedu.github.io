@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   </head>
   <body>
     <div class="desktop-note mobile-only">
@@ -57,7 +58,7 @@
             <li>Select WhatsApp and send to yourself.</li>
             <li>Log into <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a>.</li>
             <li>Download the file you sent yourself.</li>
-            <li>Unzip it and upload the .txt file below!</li>
+            <li>Upload the .txt file or .zip file below!</li>
           </ol>
           <div class="cs-instructions-note">
             <strong>Note:</strong> WhatsApp exports are limited to ~40,000 messages per file
@@ -66,13 +67,13 @@
       </section>
       <section id="file-upload" class="cs-upload">
         <div id="upload-area" class="upload-area">
-          <input type="file" id="file-input" accept=".txt" style="display: none" />
+          <input type="file" id="file-input" accept=".txt,.zip" style="display: none" />
           <div class="button-container">
             <button id="sample-btn" type="button">Try Sample Chat</button>
             <div class="or-divider">or</div>
             <button id="browse-btn" type="button">Upload Your Chat</button>
           </div>
-          <p>drag & drop your WhatsApp chat file</p>
+          <p>drag & drop your WhatsApp chat file (.txt or .zip)</p>
         </div>
       </section>
       <section id="summary" class="hidden-on-load">
