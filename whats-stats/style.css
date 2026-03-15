@@ -457,7 +457,7 @@ ol {
   background: #f0f4fa;
   border: 2px dashed #2a6ebb;
   border-radius: 8px;
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 0;
   margin: 0 auto 2.5rem auto;
   max-width: 600px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -465,15 +465,74 @@ ol {
   font-size: 1.12rem;
   color: #222;
 }
-.cs-instructions-card h2 {
-  color: #2a6ebb;
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 1.2rem;
-  text-align: center;
+.cs-instructions-details {
+  display: block;
 }
-.cs-instructions-card ol {
+.cs-instructions-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: #2a6ebb;
+  font-size: 1.1rem;
+  user-select: none;
+}
+.cs-instructions-summary::-webkit-details-marker {
+  display: none;
+}
+.cs-instructions-summary:hover {
+  color: #1a5a9e;
+}
+.cs-instructions-chevron {
+  font-size: 0.75em;
+  transition: transform 0.2s ease;
+  margin-left: 0.5rem;
+}
+.cs-instructions-details[open] .cs-instructions-chevron {
+  transform: rotate(180deg);
+}
+.cs-instructions-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid #e0eaf6;
+}
+.cs-instructions-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.2rem 0 1rem 0;
+}
+.cs-instructions-tab {
+  padding: 0.5rem 1rem;
+  border: 2px solid #b3c6e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #2a6ebb;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.cs-instructions-tab:hover {
+  background: #e8eef6;
+  border-color: #2a6ebb;
+}
+.cs-instructions-tab.active {
+  background: #2a6ebb;
+  border-color: #2a6ebb;
+  color: #fff;
+}
+.cs-instructions-panels {
+  position: relative;
+}
+.cs-instructions-panel {
+  display: none;
+}
+.cs-instructions-panel.active {
+  display: block;
+}
+.cs-instructions-panel ol {
   margin: 0 0 0.5rem 1.2rem;
   padding-left: 1.2rem;
   color: #444;
@@ -488,14 +547,25 @@ ol {
 }
 @media (max-width: 600px) {
   .cs-instructions-card {
-    padding: 1.1rem 0.5rem 1.1rem 0.5rem;
+    padding: 0;
     max-width: 98vw;
     font-size: 0.98rem;
   }
-  .cs-instructions-card h2 {
-    font-size: 1.1rem;
+  .cs-instructions-summary {
+    padding: 1rem 1rem;
+    font-size: 1rem;
   }
-  .cs-instructions-card ol {
+  .cs-instructions-content {
+    padding: 0 1rem 1rem 1rem;
+  }
+  .cs-instructions-tabs {
+    margin: 1rem 0 0.8rem 0;
+  }
+  .cs-instructions-tab {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .cs-instructions-panel ol {
     font-size: 0.98rem;
   }
 }

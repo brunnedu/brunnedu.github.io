@@ -45,24 +45,39 @@
     <main>
       <section id="instructions" class="cs-instructions">
         <div class="cs-instructions-card">
-          <h2>How to Use WhatsStats</h2>
-          <ol>
-            <li>Open the WhatsApp chat you want to analyze.</li>
-            <li>Scroll up to load more message history.</li>
-            <li>
-              <strong>Android:</strong> Tap the three-dot menu (⋮).<br /><strong>iPhone:</strong>
-              Tap the contact/group name.
-            </li>
-            <li>Select "More" → "Export Chat".</li>
-            <li>Choose "Without Media".</li>
-            <li>Select WhatsApp and send to yourself.</li>
-            <li>Log into <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a>.</li>
-            <li>Download the file you sent yourself.</li>
-            <li>Upload the .txt file or .zip file below!</li>
-          </ol>
-          <div class="cs-instructions-note">
-            <strong>Note:</strong> WhatsApp exports are limited to ~40,000 messages per file
-          </div>
+          <details class="cs-instructions-details">
+            <summary class="cs-instructions-summary">
+              <span>How to export your chat</span>
+              <span class="cs-instructions-chevron" aria-hidden="true">▼</span>
+            </summary>
+            <div class="cs-instructions-content">
+              <div class="cs-instructions-tabs" role="tablist">
+                <button type="button" class="cs-instructions-tab active" role="tab" aria-selected="true" data-platform="android">Android</button>
+                <button type="button" class="cs-instructions-tab" role="tab" aria-selected="false" data-platform="iphone">iPhone</button>
+              </div>
+              <div class="cs-instructions-panels">
+                <div class="cs-instructions-panel active" id="panel-android" role="tabpanel">
+                  <ol>
+                    <li>Open chat → tap ⋮ → More → Export Chat.</li>
+                    <li>Choose "Without Media" and send to yourself.</li>
+                    <li>Download the file from <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a> on your computer.</li>
+                    <li>Upload the .txt or .zip file below.</li>
+                  </ol>
+                </div>
+                <div class="cs-instructions-panel" id="panel-iphone" role="tabpanel" hidden>
+                  <ol>
+                    <li>Open chat → tap the contact or group name at the top.</li>
+                    <li>Tap "Export Chat" → "Without Media" → send to yourself.</li>
+                    <li>Download the file from <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a> on your computer.</li>
+                    <li>Upload the .txt or .zip file below.</li>
+                  </ol>
+                </div>
+              </div>
+              <div class="cs-instructions-note">
+                <strong>Note:</strong> WhatsApp exports are limited to ~40,000 messages per file
+              </div>
+            </div>
+          </details>
         </div>
       </section>
       <section id="file-upload" class="cs-upload">

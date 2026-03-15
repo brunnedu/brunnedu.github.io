@@ -1347,6 +1347,24 @@ document.addEventListener('DOMContentLoaded', function () {
   const browseBtn = document.getElementById('browse-btn');
   const summaryDiv = document.querySelector('.summary-placeholder');
 
+  // Instructions platform tabs
+  const instructionTabs = document.querySelectorAll('.cs-instructions-tab');
+  const instructionPanels = document.querySelectorAll('.cs-instructions-panel');
+  instructionTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const platform = tab.getAttribute('data-platform');
+      instructionTabs.forEach((t) => {
+        t.classList.toggle('active', t === tab);
+        t.setAttribute('aria-selected', t === tab);
+      });
+      instructionPanels.forEach((panel) => {
+        const isActive = panel.id === 'panel-' + platform;
+        panel.classList.toggle('active', isActive);
+        panel.hidden = !isActive;
+      });
+    });
+  });
+
   // Helper: Show status
   function setStatus(msg, isSuccess = false) {
     // Remove any previous status or success message
