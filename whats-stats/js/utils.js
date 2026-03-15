@@ -59,3 +59,66 @@ export function getWeekNumber(date) {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 }
+
+/**
+ * Get min and max dates from message timestamps.
+ */
+export function getTimeRangeFromMessages(messages) {
+  if (!messages.length) return { minDate: null, maxDate: null };
+  const dates = messages.map((m) => new Date(m.timestamp));
+  return {
+    minDate: new Date(Math.min(...dates)),
+    maxDate: new Date(Math.max(...dates)),
+  };
+}
+
+/**
+ * Generate monthly bucket dates (1st of each month) from min to max, inclusive.
+ * Returns array of Date objects for use with Plotly type: 'date'.
+ */
+export function generateMonthlyBuckets(minDate, maxDate) {
+  const buckets = [];
+  const current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+  while (current <= end) {
+    buckets.push(new Date(current));
+    current.setMonth(current.getMonth() + 1);
+  }
+  return buckets;
+}
+
+/**
+ * Get YYYY-MM key for a date (for aggregation).
+ */
+export function getMonthKey(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * Aggregate message counts by monthly buckets.
+ * @param {Array} messages - Parsed messages
+ * @param {Array<Date>} bucketDates - From generateMonthlyBuckets
+ * @param {{ byParticipant?: boolean }} opts
+ * @returns {{ counts: number[], byUser?: Record<string, number[]> }}
+ */
+export function aggregateMessagesByMonth(messages, bucketDates, { byParticipant = false } = {}) {
+  const bucketKeys = bucketDates.map((d) => getMonthKey(d));
+  const keyToIndex = Object.fromEntries(bucketKeys.map((k, i) => [k, i]));
+  const counts = bucketKeys.map(() => 0);
+  const byUser = byParticipant ? {} : null;
+
+  messages.forEach((m) => {
+    if (!m.user && byParticipant) return;
+    const key = getMonthKey(m.timestamp);
+    const idx = keyToIndex[key];
+    if (idx === undefined) return;
+    counts[idx]++;
+    if (byParticipant) {
+      if (!byUser[m.user]) byUser[m.user] = bucketKeys.map(() => 0);
+      byUser[m.user][idx]++;
+    }
+  });
+
+  return byParticipant ? { counts, byUser } : { counts };
+}

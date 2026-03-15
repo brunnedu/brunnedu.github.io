@@ -2,48 +2,40 @@ import {
   PLOTLY_TITLE_SIZE,
   PLOTLY_TICK_FONT_SIZE,
   PLOTLY_LEFT_MARGIN,
-  getWeekNumber,
   PARTICIPANT_COLORS,
+  getTimeRangeFromMessages,
+  generateMonthlyBuckets,
+  aggregateMessagesByMonth,
 } from '../utils.js';
 import { getParticipantsSortedByMessageCount } from '../analysis.js';
 
 export function renderActivityOverTime(messages) {
   const container = document.getElementById('viz-activity-over-time');
   container.innerHTML = '';
-  const weekCounts = {};
-  messages.forEach((m) => {
-    const date = new Date(m.timestamp);
-    const year = date.getFullYear();
-    const week = getWeekNumber(date);
-    const weekStr = `${year}-W${week.toString().padStart(2, '0')}`;
-    weekCounts[weekStr] = (weekCounts[weekStr] || 0) + 1;
-  });
-  const data = Object.entries(weekCounts)
-    .map(([week, count]) => ({ week, count }))
-    .sort((a, b) => a.week.localeCompare(b.week));
-  if (data.length === 0) {
+  const { minDate, maxDate } = getTimeRangeFromMessages(messages);
+  if (!minDate || !maxDate) {
     container.textContent = 'No data to display.';
     return;
   }
+  const bucketDates = generateMonthlyBuckets(minDate, maxDate);
+  const { counts } = aggregateMessagesByMonth(messages, bucketDates);
   const trace = {
-    x: data.map((d) => d.week),
-    y: data.map((d) => d.count),
+    x: bucketDates,
+    y: counts,
     type: 'scatter',
     mode: 'lines+markers',
     marker: { color: '#2a6ebb' },
     line: { color: '#2a6ebb', width: 3 },
-    hovertemplate: 'Week %{x}<br>%{y} messages<extra></extra>',
+    hovertemplate: '%{x|%b %Y}<br>%{y} messages<extra></extra>',
   };
   const layout = {
     title: { text: 'Messages Over Time', font: { size: PLOTLY_TITLE_SIZE } },
     margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 60 },
     xaxis: {
-      title: 'Week',
-      tickangle: -30,
+      title: 'Month',
+      type: 'date',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
-      type: 'category',
-      nticks: Math.min(12, data.length),
     },
     yaxis: {
       title: 'Messages',
@@ -62,31 +54,23 @@ export function renderActivityOverTime(messages) {
 export function renderActivityOverTimeGrouped(messages) {
   const container = document.getElementById('viz-activity-over-time-grouped');
   container.innerHTML = '';
+  const { minDate, maxDate } = getTimeRangeFromMessages(messages);
+  if (!minDate || !maxDate) {
+    container.textContent = 'No data to display.';
+    return;
+  }
+  const bucketDates = generateMonthlyBuckets(minDate, maxDate);
   const { participants } = getParticipantsSortedByMessageCount(messages);
-  const weekCountsByUser = {};
-  participants.forEach((user) => {
-    weekCountsByUser[user] = {};
-  });
-  messages.forEach((m) => {
-    if (!m.user) return;
-    const date = new Date(m.timestamp);
-    const year = date.getFullYear();
-    const week = getWeekNumber(date);
-    const weekStr = `${year}-W${week.toString().padStart(2, '0')}`;
-    weekCountsByUser[m.user][weekStr] = (weekCountsByUser[m.user][weekStr] || 0) + 1;
-  });
-  const allWeeks = Array.from(
-    new Set(Object.values(weekCountsByUser).flatMap((obj) => Object.keys(obj)))
-  ).sort();
+  const { byUser } = aggregateMessagesByMonth(messages, bucketDates, { byParticipant: true });
   const traces = participants.map((user, idx) => ({
-    x: allWeeks,
-    y: allWeeks.map((week) => weekCountsByUser[user][week] || 0),
+    x: bucketDates,
+    y: (byUser[user] || bucketDates.map(() => 0)),
     name: user,
     type: 'scatter',
     mode: 'lines+markers',
     marker: { color: PARTICIPANT_COLORS[idx % PARTICIPANT_COLORS.length] },
     line: { color: PARTICIPANT_COLORS[idx % PARTICIPANT_COLORS.length], width: 3 },
-    hovertemplate: `${user}<br>Week %{x}<br>%{y} messages<extra></extra>`,
+    hovertemplate: `${user}<br>%{x|%b %Y}<br>%{y} messages<extra></extra>`,
   }));
   if (traces.every((t) => t.y.every((y) => y === 0))) {
     container.textContent = 'No data to display.';
@@ -94,20 +78,18 @@ export function renderActivityOverTimeGrouped(messages) {
   }
   const layout = {
     title: {
-      text: 'Message Activity Over Time (Grouped by Participant, per Week)',
+      text: 'Message Activity Over Time (Grouped by Participant, per Month)',
       font: { size: PLOTLY_TITLE_SIZE },
     },
     margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
     xaxis: {
-      title: 'Week',
-      tickangle: -30,
+      title: 'Month',
+      type: 'date',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
-      type: 'category',
-      nticks: Math.min(12, allWeeks.length),
     },
     yaxis: {
-      title: 'Messages per Week',
+      title: 'Messages per Month',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
     },
@@ -122,29 +104,21 @@ export function renderActivityOverTimeGrouped(messages) {
 export function renderActivityOverTimeStackedPercent(messages) {
   const container = document.getElementById('viz-activity-over-time-stacked-percent');
   container.innerHTML = '';
+  const { minDate, maxDate } = getTimeRangeFromMessages(messages);
+  if (!minDate || !maxDate) {
+    container.textContent = 'No data to display.';
+    return;
+  }
+  const bucketDates = generateMonthlyBuckets(minDate, maxDate);
   const { participants } = getParticipantsSortedByMessageCount(messages, { order: 'asc' });
-  const monthCountsByUser = {};
-  participants.forEach((user) => {
-    monthCountsByUser[user] = {};
-  });
-  messages.forEach((m) => {
-    if (!m.user) return;
-    const date = new Date(m.timestamp);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const monthStr = `${year}-${month}`;
-    monthCountsByUser[m.user][monthStr] = (monthCountsByUser[m.user][monthStr] || 0) + 1;
-  });
-  const allMonths = Array.from(
-    new Set(Object.values(monthCountsByUser).flatMap((obj) => Object.keys(obj)))
-  ).sort();
-  const totalPerMonth = allMonths.map((month) =>
-    participants.reduce((sum, user) => sum + (monthCountsByUser[user][month] || 0), 0)
+  const { byUser } = aggregateMessagesByMonth(messages, bucketDates, { byParticipant: true });
+  const totalPerMonth = bucketDates.map((_, i) =>
+    participants.reduce((sum, user) => sum + ((byUser[user] || [])[i] || 0), 0)
   );
   const traces = participants.map((user, idx) => ({
-    x: allMonths,
-    y: allMonths.map((month, i) => {
-      const count = monthCountsByUser[user][month] || 0;
+    x: bucketDates,
+    y: bucketDates.map((_, i) => {
+      const count = (byUser[user] || [])[i] || 0;
       const total = totalPerMonth[i] || 1;
       return (count / total) * 100;
     }),
@@ -155,7 +129,7 @@ export function renderActivityOverTimeStackedPercent(messages) {
     groupnorm: 'percent',
     marker: { color: PARTICIPANT_COLORS[idx % PARTICIPANT_COLORS.length] },
     line: { width: 0.5 },
-    hovertemplate: `${user}<br>Month %{x}<br>%{y:.1f}% of messages<extra></extra>`,
+    hovertemplate: `${user}<br>%{x|%b %Y}<br>%{y:.1f}% of messages<extra></extra>`,
   }));
   if (traces.every((t) => t.y.every((y) => y === 0))) {
     container.textContent = 'No data to display.';
@@ -169,11 +143,9 @@ export function renderActivityOverTimeStackedPercent(messages) {
     margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
     xaxis: {
       title: 'Month',
-      tickangle: -30,
+      type: 'date',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
-      type: 'category',
-      nticks: Math.min(12, allMonths.length),
     },
     yaxis: {
       title: 'Share of Messages (%)',

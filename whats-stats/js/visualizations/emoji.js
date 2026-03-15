@@ -1,4 +1,11 @@
-import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN } from '../utils.js';
+import {
+  PLOTLY_TITLE_SIZE,
+  PLOTLY_TICK_FONT_SIZE,
+  PLOTLY_LEFT_MARGIN,
+  getTimeRangeFromMessages,
+  generateMonthlyBuckets,
+  getMonthKey,
+} from '../utils.js';
 import { countEmojiOccurrences } from '../analysis.js';
 
 function withVariationSelector(emoji) {
@@ -95,6 +102,13 @@ export function renderEmojiTrends(messages) {
     return;
   }
 
+  const { minDate, maxDate } = getTimeRangeFromMessages(messages);
+  if (!minDate || !maxDate) {
+    container.textContent = 'No emoji usage data to display.';
+    return;
+  }
+
+  const bucketDates = generateMonthlyBuckets(minDate, maxDate);
   const monthCountsByEmoji = {};
   topEmojis.forEach((emoji) => {
     monthCountsByEmoji[emoji] = {};
@@ -104,13 +118,8 @@ export function renderEmojiTrends(messages) {
   const genderSigns = ['\u2640', '\u2642', '\u2640\uFE0F', '\u2642\uFE0F', '♀', '♂', '♀️', '♂️'];
 
   messages.forEach((m) => {
-    const date = new Date(m.timestamp);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const monthStr = `${year}-${month}`;
-
-    const emojis = Array.from(m.message.matchAll(emojiRegex), (m) => m[0]);
-
+    const monthStr = getMonthKey(m.timestamp);
+    const emojis = Array.from(m.message.matchAll(emojiRegex), (match) => match[0]);
     emojis.forEach((emoji) => {
       if (genderSigns.includes(emoji)) return;
       if (topEmojis.includes(emoji)) {
@@ -118,15 +127,6 @@ export function renderEmojiTrends(messages) {
       }
     });
   });
-
-  const allMonths = Array.from(
-    new Set(Object.values(monthCountsByEmoji).flatMap((obj) => Object.keys(obj)))
-  ).sort();
-
-  if (allMonths.length === 0) {
-    container.textContent = 'No emoji usage data to display.';
-    return;
-  }
 
   const emojiColors = [
     '#2a6ebb',
@@ -142,14 +142,14 @@ export function renderEmojiTrends(messages) {
   ];
 
   const traces = topEmojis.map((emoji, idx) => ({
-    x: allMonths,
-    y: allMonths.map((month) => monthCountsByEmoji[emoji][month] || 0),
+    x: bucketDates,
+    y: bucketDates.map((d) => monthCountsByEmoji[emoji][getMonthKey(d)] || 0),
     name: emoji,
     type: 'scatter',
     mode: 'lines+markers',
     marker: { color: emojiColors[idx % emojiColors.length] },
     line: { color: emojiColors[idx % emojiColors.length], width: 3 },
-    hovertemplate: `${emoji}<br>Month %{x}<br>%{y} uses<extra></extra>`,
+    hovertemplate: `${emoji}<br>%{x|%b %Y}<br>%{y} uses<extra></extra>`,
   }));
 
   const layout = {
@@ -160,11 +160,9 @@ export function renderEmojiTrends(messages) {
     margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
     xaxis: {
       title: 'Month',
-      tickangle: -30,
+      type: 'date',
       tickfont: { size: PLOTLY_TICK_FONT_SIZE },
       automargin: true,
-      type: 'category',
-      nticks: Math.min(12, allMonths.length),
     },
     yaxis: {
       title: 'Usage Count',
