@@ -26,106 +26,106 @@ export function generateAllMatchups(players) {
   return matchups;
 }
 
-function dedupeMatchups(matchups) {
-  const seen = new Set();
-  const result = [];
-  for (const m of matchups) {
-    const key = matchKey(m);
-    if (!seen.has(key)) {
-      seen.add(key);
-      result.push(m);
-    }
-  }
-  return result;
-}
-
 function matchKey(m) {
   const t1 = [...m.teamA].sort().join(',');
   const t2 = [...m.teamB].sort().join(',');
   return [t1, t2].sort().join(' vs ');
 }
 
+function partnershipKey(p1, p2) {
+  return [p1, p2].sort().join('|');
+}
+
 /**
- * Schedule matchups with fair rotation: balanced play counts, partnership diversity,
- * minimal consecutive sit-outs.
+ * Schedule all matchups in fair order.
+ *
+ * Hard constraint: every matchup is played exactly once.
+ * Primary optimization: minimize sit-out imbalance — at any point in the
+ * schedule, the difference between the most and least sat-out player
+ * should be as small as possible.
+ * Secondary optimization: maximize partnership diversity early.
  */
 export function scheduleFairRotation(matchups, players) {
   if (matchups.length === 0) return [];
 
-  const schedule = [];
-  let remaining = matchups.map((m) => ({ ...m, key: matchKey(m) }));
-  const playCount = new Map(players.map((p) => [p, 0]));
+  const remaining = new Map();
+  for (const m of matchups) {
+    remaining.set(matchKey(m), m);
+  }
+
+  const sitCount = new Map(players.map((p) => [p, 0]));
   const partnershipCount = new Map();
-  const consecutiveSitouts = new Map(players.map((p) => [p, 0]));
+  const schedule = [];
+  let rrIndex = 0;
 
-  function getPartnershipKey(p1, p2) {
-    return [p1, p2].sort().join('|');
-  }
+  while (remaining.size > 0) {
+    let bestMatch = null;
+    let bestKey = null;
+    let bestScore = -Infinity;
 
-  function scoreMatch(m) {
-    const playing = [...m.teamA, ...m.teamB];
-    const sitting = players.filter((p) => !playing.includes(p));
+    for (const [key, m] of remaining) {
+      const playing = new Set([...m.teamA, ...m.teamB]);
+      const sitters = players.filter((p) => !playing.has(p));
 
-    const maxPlayed = Math.max(...playCount.values(), 0);
-    let playPriority = 0;
-    for (const p of playing) {
-      playPriority += maxPlayed - (playCount.get(p) ?? 0);
-    }
+      // Simulate sit-out counts after this match
+      let maxSit = 0;
+      let minSit = Infinity;
+      for (const p of players) {
+        const c = sitCount.get(p) + (sitters.includes(p) ? 1 : 0);
+        if (c > maxSit) maxSit = c;
+        if (c < minSit) minSit = c;
+      }
+      const sitDiff = maxSit - minSit;
 
-    let partnershipPriority = 0;
-    for (const pair of [m.teamA, m.teamB]) {
-      const key = getPartnershipKey(pair[0], pair[1]);
-      const count = partnershipCount.get(key) ?? 0;
-      partnershipPriority += count === 0 ? 10 : 0;
-    }
+      // Prefer sitters who have sat out the least (round-robin tie-break)
+      let sitPriority = 0;
+      for (const p of sitters) {
+        sitPriority += sitCount.get(p);
+      }
 
-    let sitoutPenalty = 0;
-    for (const p of sitting) {
-      sitoutPenalty += (consecutiveSitouts.get(p) ?? 0) * 5;
-    }
+      // Round-robin tie-break: prefer when sitters match the current rr slot
+      let rrBonus = 0;
+      for (const p of sitters) {
+        const idx = players.indexOf(p);
+        if (idx === rrIndex % players.length) rrBonus += 1;
+      }
 
-    return playPriority * 2 + partnershipPriority - sitoutPenalty;
-  }
+      // Partnership novelty
+      let newPairs = 0;
+      for (const pair of [m.teamA, m.teamB]) {
+        const pk = partnershipKey(pair[0], pair[1]);
+        if (!partnershipCount.get(pk)) newPairs++;
+      }
 
-  function applyMatch(m) {
-    const playing = [...m.teamA, ...m.teamB];
-    const sitting = players.filter((p) => !playing.includes(p));
+      // Score: minimize sit-out diff (most important), then prefer low
+      // sit-count sitters, then rr bonus, then partnership novelty
+      const score =
+        -sitDiff * 10000 +
+        -sitPriority * 100 +
+        rrBonus * 10 +
+        newPairs;
 
-    for (const p of playing) {
-      playCount.set(p, (playCount.get(p) ?? 0) + 1);
-      consecutiveSitouts.set(p, 0);
-    }
-    for (const p of sitting) {
-      consecutiveSitouts.set(p, (consecutiveSitouts.get(p) ?? 0) + 1);
-    }
-    for (const pair of [m.teamA, m.teamB]) {
-      const key = getPartnershipKey(pair[0], pair[1]);
-      partnershipCount.set(key, (partnershipCount.get(key) ?? 0) + 1);
-    }
-  }
-
-  while (remaining.length > 0) {
-    let best = remaining[0];
-    let bestScore = scoreMatch(best);
-    const ties = [best];
-
-    for (let i = 1; i < remaining.length; i++) {
-      const m = remaining[i];
-      const s = scoreMatch(m);
-      if (s > bestScore) {
-        best = m;
-        bestScore = s;
-        ties.length = 0;
-        ties.push(m);
-      } else if (s === bestScore) {
-        ties.push(m);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = m;
+        bestKey = key;
       }
     }
 
-    const picked = ties.length === 1 ? ties[0] : ties[Math.floor(Math.random() * ties.length)];
-    schedule.push({ teamA: picked.teamA, teamB: picked.teamB });
-    applyMatch(picked);
-    remaining = remaining.filter((m) => m.key !== picked.key);
+    schedule.push({ teamA: bestMatch.teamA, teamB: bestMatch.teamB });
+    remaining.delete(bestKey);
+
+    const playing = new Set([...bestMatch.teamA, ...bestMatch.teamB]);
+    for (const p of players) {
+      if (!playing.has(p)) {
+        sitCount.set(p, sitCount.get(p) + 1);
+      }
+    }
+    for (const pair of [bestMatch.teamA, bestMatch.teamB]) {
+      const pk = partnershipKey(pair[0], pair[1]);
+      partnershipCount.set(pk, (partnershipCount.get(pk) ?? 0) + 1);
+    }
+    rrIndex++;
   }
 
   return schedule;
