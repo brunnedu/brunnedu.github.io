@@ -1,11 +1,11 @@
 import {
-  PLOTLY_TITLE_SIZE,
-  PLOTLY_TICK_FONT_SIZE,
-  PLOTLY_LEFT_MARGIN,
   PARTICIPANT_COLORS,
   getTimeRangeFromMessages,
   generateMonthlyBuckets,
   aggregateMessagesByMonth,
+  getPlotlyLayoutSizes,
+  getChartHeightPx,
+  getPlotlyConfig,
 } from '../utils.js';
 import { getParticipantsSortedByMessageCount } from '../analysis.js';
 
@@ -28,27 +28,28 @@ export function renderActivityOverTime(messages) {
     line: { color: '#2a6ebb', width: 3 },
     hovertemplate: '%{x|%b %Y}<br>%{y} messages<extra></extra>',
   };
+  const L = getPlotlyLayoutSizes();
   const layout = {
-    title: { text: 'Messages Over Time', font: { size: PLOTLY_TITLE_SIZE } },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 60 },
+    title: { text: 'Messages Over Time', font: { size: L.title } },
+    margin: { l: L.left, r: 30, t: 60, b: 60 },
     xaxis: {
       title: 'Month',
       type: 'date',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Messages',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     showlegend: false,
     width: container.offsetWidth,
-    height: 320,
+    height: getChartHeightPx('small'),
   };
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }
 
 export function renderActivityOverTimeGrouped(messages) {
@@ -76,29 +77,30 @@ export function renderActivityOverTimeGrouped(messages) {
     container.textContent = 'No data to display.';
     return;
   }
+  const L = getPlotlyLayoutSizes();
   const layout = {
     title: {
       text: 'Message Activity Over Time (Grouped by Participant, per Month)',
-      font: { size: PLOTLY_TITLE_SIZE },
+      font: { size: L.title },
     },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
+    margin: { l: L.left, r: 30, t: 100, b: 80 },
     xaxis: {
       title: 'Month',
       type: 'date',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Messages per Month',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 680,
+    height: getChartHeightPx('large'),
   };
-  Plotly.newPlot(container, traces, layout, { responsive: true });
+  Plotly.newPlot(container, traces, layout, getPlotlyConfig());
 }
 
 export function renderActivityOverTimeStackedPercent(messages) {
@@ -135,28 +137,29 @@ export function renderActivityOverTimeStackedPercent(messages) {
     container.textContent = 'No data to display.';
     return;
   }
+  const L = getPlotlyLayoutSizes();
   const layout = {
     title: {
       text: 'Message Activity Over Time (Stacked Area, % by Participant, per Month)',
-      font: { size: PLOTLY_TITLE_SIZE },
+      font: { size: L.title },
     },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
+    margin: { l: L.left, r: 30, t: 100, b: 80 },
     xaxis: {
       title: 'Month',
       type: 'date',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Share of Messages (%)',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
       range: [0, 100],
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 680,
+    height: getChartHeightPx('large'),
   };
-  Plotly.newPlot(container, traces, layout, { responsive: true });
+  Plotly.newPlot(container, traces, layout, getPlotlyConfig());
 }

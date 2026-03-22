@@ -1,4 +1,10 @@
-import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN, formatDuration, formatDateTimeNoSeconds } from '../utils.js';
+import {
+  formatDuration,
+  formatDateTimeNoSeconds,
+  getPlotlyLayoutSizes,
+  getChartHeightPx,
+  getPlotlyConfig,
+} from '../utils.js';
 
 export function renderMessageLengthHistogram(messages) {
   const container = document.getElementById('viz-message-length-histogram');
@@ -15,17 +21,18 @@ export function renderMessageLengthHistogram(messages) {
     nbinsx: 200,
     hovertemplate: '%{x} characters: %{y} messages<extra></extra>',
   };
+  const L = getPlotlyLayoutSizes();
   const layout = {
-    title: { text: 'Message Lengths', font: { size: PLOTLY_TITLE_SIZE } },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 60 },
+    title: { text: 'Message Lengths', font: { size: L.title } },
+    margin: { l: L.left, r: 30, t: 60, b: 60 },
     xaxis: {
       title: 'Length (characters)',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Messages',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
       type: 'log',
     },
@@ -33,9 +40,9 @@ export function renderMessageLengthHistogram(messages) {
     paper_bgcolor: 'rgba(0,0,0,0)',
     showlegend: false,
     width: container.offsetWidth,
-    height: 340,
+    height: getChartHeightPx('small'),
   };
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }
 
 export function renderLongestSilences(messages) {

@@ -74,7 +74,7 @@ export function createUpload({ onMessagesLoaded }) {
           <div class="or-divider">or</div>
           <button id="browse-btn" type="button">Upload Your Chat</button>
         </div>
-        <p>drag & drop your WhatsApp chat file</p>
+        <p class="upload-area-hint">Tap <strong>Upload your chat</strong> to choose a file, or drag &amp; drop a <strong>.txt</strong> or <strong>.zip</strong> (exported chat).</p>
       `;
     }
   }

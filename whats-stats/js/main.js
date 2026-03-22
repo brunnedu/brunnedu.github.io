@@ -34,8 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-window.addEventListener('resize', () => {
+function rerenderCharts() {
   if (lastLoadedMessages) {
     runAllVisualizations(lastLoadedMessages);
   }
+}
+
+window.addEventListener('resize', rerenderCharts);
+window.addEventListener('orientationchange', () => {
+  setTimeout(rerenderCharts, 200);
 });

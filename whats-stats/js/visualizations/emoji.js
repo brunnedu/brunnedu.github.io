@@ -1,10 +1,10 @@
 import {
-  PLOTLY_TITLE_SIZE,
-  PLOTLY_TICK_FONT_SIZE,
-  PLOTLY_LEFT_MARGIN,
   getTimeRangeFromMessages,
   generateMonthlyBuckets,
   getMonthKey,
+  getPlotlyLayoutSizes,
+  getChartHeightPx,
+  getPlotlyConfig,
 } from '../utils.js';
 import { countEmojiOccurrences } from '../analysis.js';
 
@@ -65,26 +65,28 @@ export function renderEmojiChart(messages) {
     marker: { color: '#2a6ebb' },
     hovertemplate: '%{y}<br>%{x} uses<extra></extra>',
   };
+  const L = getPlotlyLayoutSizes();
+  const emojiTick = typeof window !== 'undefined' && window.innerWidth < 600 ? 20 : 24;
   const layout = {
-    title: { text: 'Most Used Emojis', font: { size: PLOTLY_TITLE_SIZE } },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 80 },
+    title: { text: 'Most Used Emojis', font: { size: L.title } },
+    margin: { l: L.left, r: 30, t: 60, b: 80 },
     xaxis: {
       title: 'Emoji',
-      tickfont: { size: 24 },
+      tickfont: { size: emojiTick },
       automargin: true,
     },
     yaxis: {
       title: 'Count',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     showlegend: false,
     width: container.offsetWidth,
-    height: 340,
+    height: getChartHeightPx('small'),
   };
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }
 
 export function renderEmojiTrends(messages) {
@@ -152,28 +154,29 @@ export function renderEmojiTrends(messages) {
     hovertemplate: `${emoji}<br>%{x|%b %Y}<br>%{y} uses<extra></extra>`,
   }));
 
+  const L = getPlotlyLayoutSizes();
   const layout = {
     title: {
       text: 'Top 10 Emojis - Usage Trends Over Time',
-      font: { size: PLOTLY_TITLE_SIZE },
+      font: { size: L.title },
     },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
+    margin: { l: L.left, r: 30, t: 100, b: 80 },
     xaxis: {
       title: 'Month',
       type: 'date',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Usage Count',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 500,
+    height: getChartHeightPx('medium'),
   };
 
-  Plotly.newPlot(container, traces, layout, { responsive: true });
+  Plotly.newPlot(container, traces, layout, getPlotlyConfig());
 }

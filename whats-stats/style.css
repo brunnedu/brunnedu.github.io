@@ -4,12 +4,14 @@ body {
   color: #222;
   margin: 0;
   padding: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
   overflow-x: hidden;
 }
 header {
   background: #fff;
   border-bottom: 1px solid #e0e0e0;
-  padding: 1.5rem 0;
+  padding: calc(1.5rem + env(safe-area-inset-top, 0)) max(1rem, env(safe-area-inset-right, 0px)) 1.5rem
+    max(1rem, env(safe-area-inset-left, 0px));
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
@@ -17,7 +19,8 @@ main {
   max-width: 70vw;
   min-width: 320px;
   margin: 0 auto 2rem auto;
-  padding: 0 1rem;
+  padding: 0 max(1rem, env(safe-area-inset-left, 0px)) 0 max(1rem, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
 }
 section {
   background: none;
@@ -97,6 +100,8 @@ ol {
   border: none;
   border-radius: 5px;
   padding: 0.7rem 1.2rem;
+  min-height: 44px;
+  min-width: 44px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -112,6 +117,8 @@ ol {
   border: none;
   border-radius: 5px;
   padding: 0.7rem 1.2rem;
+  min-height: 44px;
+  min-width: 44px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -123,10 +130,35 @@ ol {
 }
 .button-container {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   margin-bottom: 0.7rem;
+}
+.upload-area-hint {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0.5rem 0 0;
+  line-height: 1.45;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.viz-mobile-hint {
+  text-align: center;
+  font-size: 0.92rem;
+  color: #666;
+  margin: -0.35rem auto 1.2rem;
+  max-width: 32rem;
+  line-height: 1.35;
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .viz-mobile-hint {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-bottom: 0.9rem;
+  }
 }
 .or-divider {
   font-size: 0.9rem;
@@ -184,6 +216,9 @@ ol {
   height: auto;
   margin: 0 auto;
   display: block;
+}
+.visualizations-placeholder .js-plotly-plot {
+  touch-action: pan-y pinch-zoom;
 }
 
 /* D3 chart tick label font size */
@@ -288,25 +323,6 @@ ol {
 }
 
 /* Modern ChatStats landing page styles */
-.desktop-note {
-  width: 100vw;
-  background: #fffbe6;
-  color: #b8860b;
-  text-align: center;
-  font-size: 1.05rem;
-  padding: 0.7rem 0 0.5rem 0;
-  border-bottom: 1px solid #ffe58f;
-  letter-spacing: 0.01em;
-  display: none;
-}
-.mobile-only {
-  display: block;
-}
-@media (min-width: 901px) {
-  .mobile-only {
-    display: none;
-  }
-}
 .cs-header {
   margin-top: 2.5rem;
   margin-bottom: 3rem;
@@ -407,6 +423,13 @@ ol {
   }
 }
 @media (max-width: 600px) {
+  h3 {
+    font-size: 1.45rem;
+    margin-top: 1.5rem;
+  }
+  h4 {
+    font-size: 1.2rem;
+  }
   .cs-title {
     font-size: 2.1rem;
     word-break: break-word;
@@ -505,6 +528,8 @@ ol {
 }
 .cs-instructions-tab {
   padding: 0.5rem 1rem;
+  min-height: 44px;
+  box-sizing: border-box;
   border: 2px solid #b3c6e0;
   border-radius: 6px;
   background: #fff;

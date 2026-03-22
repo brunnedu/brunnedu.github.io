@@ -1,4 +1,4 @@
-import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN } from '../utils.js';
+import { getPlotlyLayoutSizes, getChartHeightPx, getPlotlyConfig } from '../utils.js';
 import { countWordOccurrences } from '../analysis.js';
 
 export function renderMostUsedWords(messages) {
@@ -21,17 +21,21 @@ export function renderMostUsedWords(messages) {
     marker: { color: '#2a6ebb' },
     hovertemplate: '%{y}<br>%{x} uses<extra></extra>',
   };
+  const L = getPlotlyLayoutSizes();
+  const narrow = typeof window !== 'undefined' && window.innerWidth < 600;
+  const leftExtra = narrow ? 40 : 60;
+  const yTick = narrow ? 13 : 16;
   const layout = {
-    title: { text: 'Top 3-Word Sequences', font: { size: PLOTLY_TITLE_SIZE } },
-    margin: { l: PLOTLY_LEFT_MARGIN + 60, r: 30, t: 60, b: 60 },
+    title: { text: 'Top 3-Word Sequences', font: { size: L.title } },
+    margin: { l: L.left + leftExtra, r: 30, t: 60, b: 60 },
     xaxis: {
       title: 'Count',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: '3-Word Sequence',
-      tickfont: { size: 16 },
+      tickfont: { size: yTick },
       automargin: true,
       categoryorder: 'total ascending',
     },
@@ -39,9 +43,9 @@ export function renderMostUsedWords(messages) {
     paper_bgcolor: 'rgba(0,0,0,0)',
     showlegend: false,
     width: container.offsetWidth,
-    height: Math.max(220, data.length * 36 + 120),
+    height: Math.max(getChartHeightPx('medium'), data.length * 36 + 120),
   };
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }
 
 export function renderWordCloud(messages) {
@@ -92,16 +96,17 @@ export function renderWordCloud(messages) {
     hoverinfo: 'text',
   };
 
+  const L = getPlotlyLayoutSizes();
   const layout = {
-    title: { text: 'Word Cloud', font: { size: PLOTLY_TITLE_SIZE } },
+    title: { text: 'Word Cloud', font: { size: L.title } },
     xaxis: { showgrid: false, showticklabels: false, zeroline: false },
     yaxis: { showgrid: false, showticklabels: false, zeroline: false },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 0, t: 80, b: 0 },
+    margin: { l: L.left, r: 0, t: 80, b: 0 },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 500,
+    height: getChartHeightPx('medium'),
   };
 
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }

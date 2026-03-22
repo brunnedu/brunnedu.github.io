@@ -1,4 +1,4 @@
-import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN } from '../utils.js';
+import { getPlotlyLayoutSizes, getChartHeightPx, getPlotlyConfig } from '../utils.js';
 
 export function renderWeeklyHeatmap(messages) {
   const container = document.getElementById('viz-weekly-heatmap');
@@ -21,12 +21,13 @@ export function renderWeeklyHeatmap(messages) {
     colorbar: { title: 'Messages' },
     hovertemplate: '%{x}, %{y}:00 — %{z} messages<extra></extra>',
   };
+  const L = getPlotlyLayoutSizes();
   const layout = {
-    title: { text: 'Weekly Pattern', font: { size: PLOTLY_TITLE_SIZE } },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 60, b: 60 },
+    title: { text: 'Weekly Pattern', font: { size: L.title } },
+    margin: { l: L.left, r: 30, t: 60, b: 60 },
     xaxis: {
       title: 'Day',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
@@ -35,13 +36,13 @@ export function renderWeeklyHeatmap(messages) {
       tickmode: 'array',
       tickvals: [0, 6, 12, 18, 23],
       ticktext: ['00', '06', '12', '18', '23'],
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 420,
+    height: getChartHeightPx('medium'),
   };
-  Plotly.newPlot(container, [trace], layout, { responsive: true });
+  Plotly.newPlot(container, [trace], layout, getPlotlyConfig());
 }

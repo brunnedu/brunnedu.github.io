@@ -1,7 +1,51 @@
-// Plotly chart style parameters
+// Plotly chart style parameters (defaults; prefer getPlotlyLayoutSizes() for responsive layouts)
 export const PLOTLY_TITLE_SIZE = 20;
 export const PLOTLY_TICK_FONT_SIZE = 14;
 export const PLOTLY_LEFT_MARGIN = 80;
+
+/** Smaller margins & fonts on narrow viewports (mobile). */
+export function getPlotlyLayoutSizes() {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 900;
+  const narrow = w < 600;
+  return {
+    title: narrow ? 16 : PLOTLY_TITLE_SIZE,
+    tick: narrow ? 12 : PLOTLY_TICK_FONT_SIZE,
+    left: narrow ? 52 : PLOTLY_LEFT_MARGIN,
+  };
+}
+
+/**
+ * Viewport-based chart height: shorter in portrait, taller in landscape (vh fractions).
+ * @param {'small'|'medium'|'large'} variant
+ */
+export function getChartHeightPx(variant = 'medium') {
+  const land =
+    typeof window !== 'undefined' && window.innerWidth > window.innerHeight;
+  const h = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const presets = {
+    small: { portrait: 0.38, landscape: 0.48, min: 240, max: 380 },
+    medium: { portrait: 0.44, landscape: 0.55, min: 280, max: 520 },
+    large: { portrait: 0.5, landscape: 0.62, min: 320, max: 720 },
+  };
+  const p = presets[variant] || presets.medium;
+  const frac = land ? p.landscape : p.portrait;
+  return Math.round(Math.min(p.max, Math.max(p.min, h * frac)));
+}
+
+/** Reduce scroll-zoom fighting page scroll on touch devices. */
+export function isCoarsePointer() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(pointer: coarse)').matches;
+}
+
+/** Plotly config: disable scroll zoom on touch; keep responsive. */
+export function getPlotlyConfig() {
+  return {
+    responsive: true,
+    scrollZoom: !isCoarsePointer(),
+    displayModeBar: true,
+  };
+}
 
 export const PARTICIPANT_COLORS = [
   '#2a6ebb',

@@ -1,4 +1,9 @@
-import { PLOTLY_TITLE_SIZE, PLOTLY_TICK_FONT_SIZE, PLOTLY_LEFT_MARGIN, PARTICIPANT_COLORS } from '../utils.js';
+import {
+  PARTICIPANT_COLORS,
+  getPlotlyLayoutSizes,
+  getChartHeightPx,
+  getPlotlyConfig,
+} from '../utils.js';
 import { getParticipantsSortedByMessageCount } from '../analysis.js';
 
 export function renderHourlyActivity(messages) {
@@ -27,32 +32,33 @@ export function renderHourlyActivity(messages) {
     marker: { color: PARTICIPANT_COLORS[idx % PARTICIPANT_COLORS.length] },
     hovertemplate: `${user}<br>Hour %{x}:00<br>%{y:.2f} of messages<extra></extra>`,
   }));
+  const L = getPlotlyLayoutSizes();
   const layout = {
     title: {
       text: 'Hourly Activity Distribution by Participant',
-      font: { size: PLOTLY_TITLE_SIZE },
+      font: { size: L.title },
     },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 80 },
+    margin: { l: L.left, r: 30, t: 100, b: 80 },
     barmode: 'group',
     xaxis: {
       title: 'Hour',
       tickmode: 'array',
       tickvals: [0, 4, 8, 12, 16, 20, 23],
       ticktext: ['0', '4', '8', '12', '16', '20', '23'],
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Fraction of Messages',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 680,
+    height: getChartHeightPx('large'),
   };
-  Plotly.newPlot(container, traces, layout, { responsive: true });
+  Plotly.newPlot(container, traces, layout, getPlotlyConfig());
 }
 
 export function renderLongestStreaks(messages) {
@@ -128,27 +134,29 @@ export function renderLongestStreaks(messages) {
     },
   ];
 
+  const L = getPlotlyLayoutSizes();
+  const dynamicH = 200 + streaks.length * 30;
   const layout = {
     title: {
       text: 'Longest Streak by Participant (Consecutive Days with Messages)',
-      font: { size: PLOTLY_TITLE_SIZE },
+      font: { size: L.title },
     },
-    margin: { l: PLOTLY_LEFT_MARGIN, r: 30, t: 100, b: 60 },
+    margin: { l: L.left, r: 30, t: 100, b: 60 },
     xaxis: {
       title: 'Longest Streak (days)',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     yaxis: {
       title: 'Participant',
-      tickfont: { size: PLOTLY_TICK_FONT_SIZE },
+      tickfont: { size: L.tick },
       automargin: true,
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
     width: container.offsetWidth,
-    height: 200 + streaks.length * 30,
+    height: Math.max(getChartHeightPx('medium'), Math.min(dynamicH, getChartHeightPx('large') * 1.5)),
   };
 
-  Plotly.newPlot(container, traces, layout, { responsive: true });
+  Plotly.newPlot(container, traces, layout, getPlotlyConfig());
 }

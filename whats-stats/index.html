@@ -2,7 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a6ebb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="WhatsStats" />
+    <meta
+      name="description"
+      content="Upload your exported WhatsApp chat (.zip or .txt) and explore stats in your browser. All processing happens on your device."
+    />
+    <link rel="manifest" href="site.webmanifest" />
     <title>WhatsStats</title>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-53X6D6WZQY"></script>
     <link rel="stylesheet" href="style.css" />
@@ -16,9 +25,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   </head>
   <body>
-    <div class="desktop-note mobile-only">
-      <b>Note:</b> This app was developed for desktop usage.
-    </div>
     <header class="cs-header">
       <img
         src="assets/WhatsStats_logo.png"
@@ -58,18 +64,16 @@
               <div class="cs-instructions-panels">
                 <div class="cs-instructions-panel active" id="panel-android" role="tabpanel">
                   <ol>
-                    <li>Open chat → tap ⋮ → More → Export Chat.</li>
-                    <li>Choose "Without Media" and send to yourself.</li>
-                    <li>Download the file from <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a> on your computer.</li>
-                    <li>Upload the .txt or .zip file below.</li>
+                    <li>Open the chat → tap ⋮ → More → Export Chat.</li>
+                    <li>Choose <strong>Without Media</strong> — WhatsApp saves a <strong>.zip</strong> (or you can share the <strong>.txt</strong>).</li>
+                    <li>Upload that <strong>.zip</strong> or <strong>.txt</strong> below.</li>
                   </ol>
                 </div>
                 <div class="cs-instructions-panel" id="panel-iphone" role="tabpanel" hidden>
                   <ol>
-                    <li>Open chat → tap the contact or group name at the top.</li>
-                    <li>Tap "Export Chat" → "Without Media" → send to yourself.</li>
-                    <li>Download the file from <a href="https://web.whatsapp.com" target="_blank">WhatsApp Web</a> on your computer.</li>
-                    <li>Upload the .txt or .zip file below.</li>
+                    <li>Open the chat → tap the contact or group name at the top.</li>
+                    <li>Tap Export Chat → <strong>Without Media</strong> — you get a <strong>.zip</strong> (or the <strong>.txt</strong>).</li>
+                    <li>Upload that <strong>.zip</strong> or <strong>.txt</strong> below.</li>
                   </ol>
                 </div>
               </div>
@@ -88,7 +92,10 @@
             <div class="or-divider">or</div>
             <button id="browse-btn" type="button">Upload Your Chat</button>
           </div>
-          <p>drag & drop your WhatsApp chat file (.txt or .zip)</p>
+          <p class="upload-area-hint">
+            Tap <strong>Upload your chat</strong> to choose a file, or drag &amp; drop a <strong>.txt</strong> or
+            <strong>.zip</strong> (exported chat).
+          </p>
         </div>
       </section>
       <section id="summary" class="hidden-on-load">
@@ -101,6 +108,9 @@
       </section>
       <section id="visualizations" class="hidden-on-load">
         <h3>Visualizations</h3>
+        <p class="viz-mobile-hint" aria-live="polite">
+          Tip: Charts are easier to read in landscape — rotate your device if you like.
+        </p>
         <div style="margin-bottom: 2.5rem">
           <h4 style="margin-bottom: 1.2rem; color: #2a6ebb">Overall Chat Visualizations</h4>
           <div id="viz-activity-over-time" class="visualizations-placeholder">
