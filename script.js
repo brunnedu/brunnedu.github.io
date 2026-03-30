@@ -44,54 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(section);
   });
 
-  // ===== OPTIMIZED HERO SECTION ANIMATIONS =====
-  const heroElements = [
-    '.greeting',
-    '.name',
-    '.title-text',
-    '.subtitle',
-    '.headshot-container',
-    '.social-links-container',
-    '.quick-links',
-    '.scroll-arrow',
-  ];
-
-  // Mobile-optimized animation settings
-  const animationDelay = isMobile() ? 200 : 300; // Faster on mobile
-  const animationDuration = isMobile() ? 0.6 : 0.8; // Shorter duration on mobile
-
-  // Sequential animation for hero elements with performance optimization
-  heroElements.forEach((selector, index) => {
-    const element = document.querySelector(selector);
-    if (element) {
-      // Set initial state
-      element.style.opacity = '0';
-
-      // Special handling for scroll arrow to preserve centering
-      if (selector === '.scroll-arrow') {
-        element.style.transform = 'translateX(-50%) translateY(20px)';
-      } else {
-        element.style.transform = 'translateY(20px)';
-      }
-
-      element.style.transition = `opacity ${animationDuration}s ease, transform ${animationDuration}s ease`;
-
-      // Use requestAnimationFrame for smoother animations
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          element.style.opacity = '1';
-
-          // Special handling for scroll arrow to preserve centering
-          if (selector === '.scroll-arrow') {
-            element.style.transform = 'translateX(-50%) translateY(0)';
-          } else {
-            element.style.transform = 'translateY(0)';
-          }
-        }, index * animationDelay);
-      });
-    }
-  });
-
   // ===== SCROLL ARROW FUNCTIONALITY =====
   const scrollArrow = document.getElementById('scroll-arrow');
   if (scrollArrow) {

@@ -40,29 +40,48 @@ body {
 /* ===== HERO SECTION ===== */
 .hero {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   text-align: center;
   background: transparent;
   background-image: radial-gradient(circle at 25px 25px, rgba(0, 0, 0, 0.05) 2%, transparent 0%),
     radial-gradient(circle at 75px 75px, rgba(0, 0, 0, 0.05) 2%, transparent 0%);
   background-size: 100px 100px;
-  padding: 0 0;
+  padding: 0;
   position: relative;
-  transform: translateY(-3rem);
+}
+
+.hero > .container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: max(1.5rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
 .hero-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  gap: clamp(0.5rem, 2.5vh, 2rem);
   max-width: 800px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 0;
+  min-height: 0;
 }
 
-/* Hero animations */
+.hero-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .name-animation {
   margin-bottom: 0;
   text-align: center;
@@ -74,18 +93,11 @@ body {
   font-size: 2rem;
   color: var(--text-color);
   margin-bottom: 0.5rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-.greeting {
-}
-.title-text {
-}
 .subtitle {
   font-size: 1.4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .name {
@@ -95,21 +107,16 @@ body {
   background: linear-gradient(345deg, var(--secondary-color), #bcbcbc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .headshot-container {
-  width: 250px;
-  height: 250px;
-  margin: 1rem auto;
+  width: min(250px, 38vmin);
+  height: min(250px, 38vmin);
+  margin: 0 auto;
+  flex-shrink: 0;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: var(--shadow);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .headshot {
@@ -121,10 +128,7 @@ body {
 
 /* Social links */
 .social-links-container {
-  margin-top: 2.5rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  margin-top: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -163,11 +167,9 @@ body {
 .quick-links {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 1rem;
-  margin-top: 2rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  margin-top: 0;
 }
 
 .quick-link {
@@ -196,12 +198,10 @@ body {
 
 /* Scroll arrow */
 .scroll-arrow {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  flex-shrink: 0;
   width: 50px;
   height: 50px;
+  margin-top: clamp(0.25rem, 1.5vh, 1rem);
   background: var(--card-bg);
   border: var(--border-light);
   border-radius: 50%;
@@ -209,17 +209,15 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition: var(--transition);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
-  opacity: 0;
-  z-index: 1000;
 }
 
 .scroll-arrow:hover {
   background: var(--secondary-color);
   color: white;
-  transform: translateX(-50%) scale(1.1);
+  transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(9, 132, 227, 0.2);
 }
 
@@ -559,17 +557,21 @@ body > *:not(#particles-js) {
   }
   .hero {
     min-height: 100vh;
-    padding: 2rem 0;
+    min-height: 100dvh;
+  }
+
+  .hero > .container {
+    padding-top: max(1rem, calc(env(safe-area-inset-top, 0px) + 0.5rem));
   }
 }
 
 @media (max-width: 365px) {
   .hero {
+    min-height: 100vh;
     min-height: 100dvh;
-    padding: 1rem 0 0.5rem 0;
   }
   .hero-content {
-    padding: 0.5rem 0 0 0;
+    gap: clamp(0.35rem, 1.5vh, 1rem);
     max-width: 100vw;
   }
   .greeting,
@@ -611,8 +613,8 @@ body > *:not(#particles-js) {
     padding: 0.2rem 0.3rem;
   }
   .scroll-arrow {
-    bottom: 0.7rem;
     width: 36px;
     height: 36px;
+    margin-top: clamp(0.2rem, 1vh, 0.5rem);
   }
 }
