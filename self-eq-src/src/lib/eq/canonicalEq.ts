@@ -66,6 +66,10 @@ export type CanonicalEq = {
    */
   sweepNotches: EqBand[]
   bands: EqBand[]
+  /**
+   * Band ids from `allBandsForChain` (including `__tilt_*`, `__lm_*`, `sw-*`) skipped in preview, plot, and Peace export.
+   */
+  disabledChainIds: string[]
 }
 
 export function newBandId(): string {
@@ -117,6 +121,12 @@ export function allBandsForChain(eq: CanonicalEq): EqBand[] {
   const lm = loudnessPeakingBands(eq)
   const rest = sortBandsForChain([...eq.bands, ...lm, ...eq.sweepNotches])
   return [...tilt, ...rest]
+}
+
+/** Bands that contribute to audio, magnitude, and Peace export (respects `disabledChainIds`). */
+export function bandsForChainActive(eq: CanonicalEq): EqBand[] {
+  const skip = new Set(eq.disabledChainIds ?? [])
+  return allBandsForChain(eq).filter((b) => !skip.has(b.id))
 }
 
 export function sortBandsForChain(bands: EqBand[]): EqBand[] {
@@ -174,6 +184,7 @@ export function defaultCanonicalEq(): CanonicalEq {
         q: 1,
       },
     ],
+    disabledChainIds: [],
   }
 }
 
@@ -198,6 +209,7 @@ type CanonicalJson = {
   loudnessMatchDb?: Record<string, number>
   sweepNotches?: EqBandJson[]
   bands?: EqBandJson[]
+  disabledChainIds?: unknown[]
 }
 
 const KINDS: Set<string> = new Set(['lowshelf', 'highshelf', 'peaking', 'notch'])
@@ -273,6 +285,14 @@ export function parseCanonicalEqJson(text: string): CanonicalEq {
     }
   }
 
+  let disabledChainIds: string[] = []
+  if (raw.disabledChainIds !== undefined) {
+    if (!Array.isArray(raw.disabledChainIds)) throw new CanonicalEqParseError('Invalid disabledChainIds')
+    disabledChainIds = raw.disabledChainIds
+      .filter((x): x is string => typeof x === 'string' && x.length > 0)
+      .slice(0, 128)
+  }
+
   if (!Array.isArray(raw.bands)) throw new CanonicalEqParseError('Missing bands array')
 
   const bands: EqBand[] = []
@@ -309,6 +329,7 @@ export function parseCanonicalEqJson(text: string): CanonicalEq {
     loudnessMatchDb,
     sweepNotches,
     bands,
+    disabledChainIds,
   }
   return withAutoPreamp(eq)
 }
@@ -339,6 +360,9 @@ export function serializeCanonicalEq(eq: CanonicalEq, pretty = true): string {
       gainDb,
       q,
     })),
+    ...(normalized.disabledChainIds.length > 0
+      ? { disabledChainIds: [...normalized.disabledChainIds] }
+      : {}),
   }
   return pretty ? `${JSON.stringify(out, null, 2)}\n` : `${JSON.stringify(out)}\n`
 }

@@ -3,7 +3,7 @@
  * (RBJ / cookbook) and the same `sw-*` notch → peaking mapping as `applyBandToBiquad`.
  */
 
-import { allBandsForChain, type CanonicalEq, type EqBand } from './canonicalEq'
+import { bandsForChainActive, type CanonicalEq, type EqBand } from './canonicalEq'
 
 export type NormalizedBiquad = { b0: number; b1: number; b2: number; a1: number; a2: number }
 
@@ -129,7 +129,7 @@ function bandToCoeffs(band: EqBand, fs: number): NormalizedBiquad | null {
 export function eqChainMagnitudeDb(f: number, fs: number, eq: CanonicalEq): number {
   if (eq.eqBypass) return 0
   let sum = eq.preampDb
-  for (const band of allBandsForChain(eq)) {
+  for (const band of bandsForChainActive(eq)) {
     const c = bandToCoeffs(band, fs)
     if (c) sum += biquadMagDb(c, f, fs)
   }

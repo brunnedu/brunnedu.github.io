@@ -3,7 +3,7 @@
  * `sw-*` notches export as PK with negative gain (matches browser preview), not NO.
  */
 
-import { allBandsForChain, type CanonicalEq, type EqBand } from '../eq/canonicalEq'
+import { bandsForChainActive, type CanonicalEq, type EqBand } from '../eq/canonicalEq'
 
 function fcForPeace(hz: number): string {
   if (hz >= 10000) return `${Math.round(hz)} Hz`
@@ -65,7 +65,7 @@ function filterLine(
 export function exportPeaceTxt(eq: CanonicalEq): string {
   const lines: string[] = [`Preamp: ${eq.preampDb.toFixed(1)} dB`]
 
-  const ordered = allBandsForChain(eq)
+  const ordered = bandsForChainActive(eq)
   let index = 0
   for (const band of ordered) {
     const row = bandToPeaceLine(band)

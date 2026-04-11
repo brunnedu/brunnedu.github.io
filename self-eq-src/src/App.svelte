@@ -32,6 +32,7 @@
     SWEEP_F1_HZ,
   } from './lib/eq/sweep'
   import ResponsePlot from './lib/viz/ResponsePlot.svelte'
+  import ChainInspector from './lib/viz/ChainInspector.svelte'
   import { exportPeaceTxt } from './lib/peace/exportPeace'
 
   const engine = new PreviewAudioEngine()
@@ -1075,7 +1076,7 @@
     <p class="hint wrapup-json-hint">
       Profile JSON includes <code>tiltDb</code>, <code>eqBypass</code>, <code>loudnessSignalMode</code>,
       <code>loudnessMatchQMode</code>, <code>loudnessMatchDb</code>, <code>sweepNotches</code> (max {MAX_SWEEP_NOTCHES}),
-      and <code>bands</code>. <code>eqBypass</code> is preview-only.
+      <code>bands</code>, and optional <code>disabledChainIds</code>. <code>eqBypass</code> is preview-only.
     </p>
     <div class="actions wrapup-dup-actions" aria-label="Profile files (same as target curve section)">
       <button type="button" onclick={downloadJson}>Download JSON</button>
@@ -1099,6 +1100,7 @@
         markStartHz={markStartSample?.freqHz ?? null}
         reducedMotion={reducedMotionPref}
       />
+      <ChainInspector eq={eq} patch={(fn) => setEq(fn(eq))} />
       <p class="side-meta">
         Context: <code>{contextLabel}</code> · Preamp: <code>{eq.preampDb.toFixed(1)} dB</code>
         {#if eq.eqBypass}
