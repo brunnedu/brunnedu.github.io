@@ -506,6 +506,35 @@ export class PreviewAudioEngine {
     this.rampPinkMute()
   }
 
+  /**
+   * Pause the running log sweep: mute sweep output, clear timers, keep oscillator at current frequency.
+   * Returns normalized position 0…1 for UI (slider), or null if no sweep was active.
+   */
+  pauseLogSweep(): number | null {
+    if (this.sweepEndTimer !== null) {
+      clearTimeout(this.sweepEndTimer)
+      this.sweepEndTimer = null
+    }
+    if (!this.ctx || !this.sweepOsc || !this.sweepMute) return null
+    if (!this.sweepIsActive || this.sweepT0 === null) return null
+    const now = this.ctx.currentTime
+    const T = this.sweepDurationActive
+    const elapsed = now - this.sweepT0
+    const normT = Math.max(0, Math.min(1, T > 0 ? elapsed / T : 0))
+    this.sweepOsc.frequency.cancelScheduledValues(now)
+    const f = this.sweepOsc.frequency.value
+    const clamped = Math.max(SWEEP_F0_HZ, Math.min(SWEEP_F1_HZ, f))
+    this.sweepOsc.frequency.setValueAtTime(clamped, now)
+    this.sweepMute.gain.cancelScheduledValues(now)
+    this.sweepMute.gain.setValueAtTime(this.sweepMute.gain.value, now)
+    this.sweepMute.gain.linearRampToValueAtTime(0, now + 0.02)
+    this.sweepIsActive = false
+    this.sweepT0 = null
+    this.sweepManualAudible = false
+    this.rampPinkMute()
+    return normT
+  }
+
   /** Replace looping music with decoded buffer (stereo mixed to graph input). */
   loadUserMusic(buffer: AudioBuffer): void {
     if (!this.ctx || !this.musicMute) return

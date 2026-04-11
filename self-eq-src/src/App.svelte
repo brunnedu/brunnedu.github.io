@@ -220,26 +220,15 @@
     engine.stopSweepManualPreview()
     sweepManualPreviewUi = false
     sweepPlayingUi = false
+    sweepNormT = 0
     markStartSample = null
+    sweepMessage = null
     pushLoudnessCalOnly()
     syncFromEngine()
   }
 
-  async function replaySweep() {
-    await initAudio()
-    syncFromEngine()
-    if (contextLabel === 'suspended') return
-    sweepMessage = null
-    calPlaying = false
-    comparisonLoopOn = false
-    pushLoudnessCalOnly()
+  function scheduleSweepEndTimer() {
     clearSweepUiTimer()
-    engine.stopLogSweep()
-    engine.stopSweepManualPreview()
-    sweepManualPreviewUi = false
-    markStartSample = null
-    sweepPlayingUi = true
-    engine.startLogSweep(sweepDurationSec, sweepNormT)
     const ms = sweepDurationSec * 1000
     const remainFrac = Math.max(0, 1 - sweepNormT)
     sweepUiTimer = setTimeout(() => {
@@ -251,26 +240,61 @@
     }, remainFrac * ms + 120)
   }
 
+  async function toggleSweepPlayPause() {
+    await initAudio()
+    syncFromEngine()
+    if (contextLabel === 'suspended' || calPlaying) return
+    if (sweepPlayingUi) {
+      const n = engine.pauseLogSweep()
+      clearSweepUiTimer()
+      sweepPlayingUi = false
+      if (n !== null) sweepNormT = n
+      engine.setPinkAudible(pinkPlaying)
+      pushLoudnessCalOnly()
+      syncFromEngine()
+      return
+    }
+    if (sweepManualPreviewUi) {
+      engine.stopSweepManualPreview()
+      sweepManualPreviewUi = false
+      engine.setPinkAudible(pinkPlaying)
+      pushLoudnessCalOnly()
+      syncFromEngine()
+      return
+    }
+    sweepMessage = null
+    calPlaying = false
+    comparisonLoopOn = false
+    pushLoudnessCalOnly()
+    clearSweepUiTimer()
+    engine.stopLogSweep()
+    engine.stopSweepManualPreview()
+    sweepManualPreviewUi = false
+    sweepPlayingUi = true
+    engine.startLogSweep(sweepDurationSec, sweepNormT)
+    scheduleSweepEndTimer()
+  }
+
   function markSweepStart() {
     sweepMessage = null
     const s = engine.getSweepMarkSample()
     if (!s) {
-      sweepMessage = 'Play the sweep first, then click while it is running.'
+      sweepMessage = 'Press Play sweep first, then mark while the sweep is running.'
       return
     }
     markStartSample = s
-    sweepMessage = `Start marked ≈ ${Math.round(s.freqHz)} Hz — click Mark end past the peak.`
+    sweepMessage = `Start marked ≈ ${Math.round(s.freqHz)} Hz — press Mark again past the peak end.`
   }
 
   function markSweepEnd() {
     sweepMessage = null
     const end = engine.getSweepMarkSample()
     if (!markStartSample || !end) {
-      sweepMessage = 'Mark start first, then mark end while the sweep is still running.'
+      sweepMessage = 'Mark start first, then press Mark again while the sweep is still running.'
       return
     }
     if (end.elapsedSec <= markStartSample.elapsedSec) {
-      sweepMessage = 'End must be after start in time (try Replay sweep).'
+      sweepMessage = 'End must be after start in time (scrub forward, then Play sweep).'
       return
     }
     if (eq.sweepNotches.length >= MAX_SWEEP_NOTCHES) {
@@ -349,7 +373,27 @@
   }
 
   function onSweepDurationPick(sec: SweepDurationPreset) {
+    if (sweepPlayingUi) {
+      const n = engine.pauseLogSweep()
+      clearSweepUiTimer()
+      sweepPlayingUi = false
+      if (n !== null) sweepNormT = n
+      engine.setPinkAudible(pinkPlaying)
+      pushLoudnessCalOnly()
+    }
+    if (sweepManualPreviewUi) {
+      engine.stopSweepManualPreview()
+      sweepManualPreviewUi = false
+      engine.setPinkAudible(pinkPlaying)
+      pushLoudnessCalOnly()
+    }
     sweepDurationSec = sec
+    syncFromEngine()
+  }
+
+  function onMarkSweepButton() {
+    if (markStartSample) markSweepEnd()
+    else markSweepStart()
   }
 
   async function onSweepSliderInput(e: Event) {
@@ -360,10 +404,15 @@
     if (contextLabel === 'suspended') return
     if (sweepPlayingUi) {
       engine.seekLogSweep(t)
-    } else {
+      scheduleSweepEndTimer()
+    } else if (sweepManualPreviewUi) {
       engine.setSweepManualHz(freqFromNormalizedT(t, sweepDurationSec))
-      sweepManualPreviewUi = true
     }
+  }
+
+  function clearSweepMark() {
+    markStartSample = null
+    sweepMessage = null
   }
 
   function onSweepSliderPointerDown() {
@@ -565,28 +614,48 @@
     <h1>Self-EQ</h1>
     <p class="lede">
       Step through <strong>listening & tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong>
-      (5–12 kHz), and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay
-      visible on the right (or above on small screens). <strong>First tap or click</strong> anywhere unlocks audio.
+      (5–12 kHz), and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay below
+      each step. <strong>First tap or click</strong> anywhere unlocks audio.
     </p>
   </header>
 
   <nav class="wizard-nav" aria-label="Calibration steps">
-    <ol class="wizard-steps">
-      {#each WIZARD_STEPS as s, idx (s.id)}
-        <li>
-          <button
-            type="button"
-            class="wizard-step-btn"
-            class:wizard-step-active={wizardStep === s.id}
-            aria-current={wizardStep === s.id ? 'step' : undefined}
-            onclick={() => setWizardStep(s.id)}
-          >
-            <span class="wizard-step-num">{idx + 1}</span>
-            <span class="wizard-step-title">{s.title}</span>
-          </button>
-        </li>
-      {/each}
-    </ol>
+    <div class="wizard-nav-inner">
+      <button
+        type="button"
+        class="wizard-nav-arrow"
+        onclick={goWizardBack}
+        disabled={wizardStepIndex() === 0}
+        aria-label="Previous step"
+      >
+        ←
+      </button>
+      <ol class="wizard-steps">
+        {#each WIZARD_STEPS as s, idx (s.id)}
+          <li>
+            <button
+              type="button"
+              class="wizard-step-btn"
+              class:wizard-step-active={wizardStep === s.id}
+              aria-current={wizardStep === s.id ? 'step' : undefined}
+              onclick={() => setWizardStep(s.id)}
+            >
+              <span class="wizard-step-num">{idx + 1}</span>
+              <span class="wizard-step-title">{s.title}</span>
+            </button>
+          </li>
+        {/each}
+      </ol>
+      <button
+        type="button"
+        class="wizard-nav-arrow primary"
+        onclick={goWizardNext}
+        disabled={wizardStepIndex() === WIZARD_STEPS.length - 1}
+        aria-label="Next step"
+      >
+        →
+      </button>
+    </div>
   </nav>
 
   <div class="app-grid">
@@ -767,13 +836,13 @@
   <section class="panel" aria-labelledby="phase5-heading">
     <h2 id="phase5-heading">Phase 3 — Resonance sweep (5–12 kHz)</h2>
     <p class="hint">
-      Log sine sweep <strong>{SWEEP_F0_HZ}–{SWEEP_F1_HZ} Hz</strong>. Pick a <strong>duration</strong>, use the
-      <strong>position</strong> slider to explore or seek — the sine <strong>stays on</strong> at that frequency after
-      you release (including 12 kHz); use <strong>Stop preview tone</strong> to silence. Seeks while auto sweep plays.
-      Play starts from the current slider position. While playing, <strong>Mark start</strong> /
-      <strong>Mark end</strong> (up to
-      {MAX_SWEEP_NOTCHES} notches). <code>sw-*</code> use a peaking cut in preview; JSON keeps <code>type: notch</code>.
-      Stops pink/cal while running.
+      Log sine sweep <strong>{SWEEP_F0_HZ}–{SWEEP_F1_HZ} Hz</strong>. Pick <strong>duration</strong>, set
+      <strong>position</strong> on the slider (silent until you play — scrubbing does not start audio by itself). Use
+      <strong>Play sweep</strong> / <strong>Pause</strong> to run or stop the sweep from the current position; while
+      playing you can drag the slider to seek. <strong>Mark</strong> records start then end of a resonance (same
+      button, up to {MAX_SWEEP_NOTCHES} notches). <strong>Reset sweep</strong> stops audio and clears marks.
+      <code>sw-*</code> preview as peaking cuts; JSON keeps <code>type: notch</code>. Stops pink/cal while sweep audio
+      runs.
     </p>
     <div class="sweep-duration-row" role="group" aria-label="Sweep duration">
       {#each SWEEP_DURATION_PRESETS as sec (sec)}
@@ -804,19 +873,37 @@
         >{Math.round(freqFromNormalizedT(sweepNormT, sweepDurationSec))} Hz</span
       >
     </div>
-    <div class="actions">
-      <button type="button" onclick={() => void replaySweep()} disabled={contextLabel === 'suspended' || calPlaying}>
-        {sweepPlayingUi ? 'Replay sweep' : 'Play / replay sweep'}
-      </button>
-      <button
-        type="button"
-        onclick={stopUserSweep}
-        disabled={contextLabel === 'suspended' || (!sweepPlayingUi && !sweepManualPreviewUi)}
-      >
-        {sweepPlayingUi ? 'Stop sweep' : 'Stop preview tone'}
-      </button>
-      <button type="button" onclick={markSweepStart} disabled={!sweepPlayingUi}>Mark start</button>
-      <button type="button" onclick={markSweepEnd} disabled={!sweepPlayingUi}>Mark end</button>
+    <div class="actions sweep-actions">
+      <div class="sweep-actions-row">
+        <button
+          type="button"
+          class:primary={!sweepPlayingUi && !sweepManualPreviewUi}
+          onclick={() => void toggleSweepPlayPause()}
+          disabled={contextLabel === 'suspended' || calPlaying}
+        >
+          {sweepPlayingUi || sweepManualPreviewUi ? 'Pause' : 'Play sweep'}
+        </button>
+        <button
+          type="button"
+          class="small"
+          onclick={stopUserSweep}
+          disabled={contextLabel === 'suspended' ||
+            (!sweepPlayingUi && !sweepManualPreviewUi && !markStartSample)}
+        >
+          Reset sweep
+        </button>
+      </div>
+      <div class="sweep-actions-row">
+        <button
+          type="button"
+          onclick={onMarkSweepButton}
+          disabled={!sweepPlayingUi}
+          aria-label={markStartSample ? 'Mark resonance end' : 'Mark resonance start'}
+        >
+          {markStartSample ? 'Mark end' : 'Mark start'}
+        </button>
+        <button type="button" class="small" onclick={clearSweepMark} disabled={!markStartSample}>Clear mark</button>
+      </div>
     </div>
     {#if sweepMessage}
       <p class="sweep-msg" role="status">{sweepMessage}</p>
@@ -959,7 +1046,7 @@
     <p class="hint">
       Optional: load a track you know well and A/B with <strong>Bypass EQ</strong> (Listening & tilt step) at a fixed
       device volume.
-      Then save your profile from the panel on the right.
+      Then save your profile from the target curve section below.
     </p>
     <h3 class="subheading-small" id="music-heading">Reference music</h3>
     <div class="actions">
@@ -990,25 +1077,13 @@
       <code>loudnessMatchQMode</code>, <code>loudnessMatchDb</code>, <code>sweepNotches</code> (max {MAX_SWEEP_NOTCHES}),
       and <code>bands</code>. <code>eqBypass</code> is preview-only.
     </p>
-    <div class="actions wrapup-dup-actions" aria-label="Profile files (same as curve panel)">
+    <div class="actions wrapup-dup-actions" aria-label="Profile files (same as target curve section)">
       <button type="button" onclick={downloadJson}>Download JSON</button>
       <button type="button" onclick={triggerImport}>Import JSON…</button>
       <button type="button" onclick={downloadPeaceTxt}>Download Peace / APO (.txt)</button>
     </div>
   </section>
   {/if}
-
-      <div class="step-nav-row">
-        <button type="button" onclick={goWizardBack} disabled={wizardStepIndex() === 0}>← Back</button>
-        <button
-          type="button"
-          class="primary"
-          onclick={goWizardNext}
-          disabled={wizardStepIndex() === WIZARD_STEPS.length - 1}
-        >
-          Next →
-        </button>
-      </div>
     </div>
 
     <aside class="side-panel" aria-label="Target curve and profile">
@@ -1061,13 +1136,33 @@
     border-bottom: 1px solid var(--border);
   }
 
+  .wizard-nav-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .wizard-nav-arrow {
+    flex: 0 0 auto;
+    align-self: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0.25rem 0.45rem;
+    font-size: 1.05rem;
+    line-height: 1;
+    border-radius: 8px;
+  }
+
   .wizard-steps {
     list-style: none;
     margin: 0;
     padding: 0;
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+    align-content: flex-start;
   }
 
   .wizard-step-btn {
@@ -1099,39 +1194,17 @@
 
   .app-grid {
     margin-top: 1.25rem;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 34%);
-    gap: 1.25rem 1.5rem;
-    align-items: start;
-  }
-
-  @media (max-width: 52rem) {
-    .app-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .side-panel {
-      order: -1;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    align-items: stretch;
   }
 
   .step-main {
     min-width: 0;
   }
 
-  .step-nav-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
   .side-panel {
-    position: sticky;
-    top: 0.75rem;
     padding: 1rem 1rem 1.25rem;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -1384,6 +1457,19 @@
 
   .reset-band {
     margin-top: 0.35rem;
+  }
+
+  .sweep-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .sweep-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   .sweep-msg {
