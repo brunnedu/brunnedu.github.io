@@ -1,4 +1,4 @@
-# Self-EQ (source)
+# SelfEQ (source)
 
 Browser-based headphone EQ helper (Svelte 5 + Vite + TypeScript).
 

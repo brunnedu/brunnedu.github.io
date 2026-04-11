@@ -50,7 +50,7 @@ function bandToPeaceLine(band: EqBand): { kind: PeaceKind; fc: string; gainDb: n
  */
 export function exportPeaceTxt(eq: CanonicalEq): string {
   const lines: string[] = [
-    '# Self-EQ export — Equalizer APO / Peace',
+    '# SelfEQ export — Equalizer APO / Peace',
     '# Order matches preview: tilt shelves, then shelves/peaking/notches by chain policy.',
     '# sw-* notches: exported as PK (negative gain) to match browser preview; JSON keeps type "notch".',
     '',

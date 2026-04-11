@@ -611,7 +611,7 @@
 
 <main class="shell">
   <header class="header">
-    <h1>Self-EQ</h1>
+    <h1>SelfEQ</h1>
     <p class="lede">
       Step through <strong>listening & tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong>
       (5–12 kHz), and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay below

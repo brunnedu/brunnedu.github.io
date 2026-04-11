@@ -1,4 +1,4 @@
-# Self-EQ — Detailed Product & Implementation Plan
+# SelfEQ — Detailed Product & Implementation Plan
 
 This document extends [INITIAL_DESIGN_DOC.md](./INITIAL_DESIGN_DOC.md) with locked design decisions, concrete behavior, technical architecture, implementation phases, and **resolved** implementation constants (formerly open questions Q1–Q10).
 
