@@ -136,6 +136,43 @@ export function eqChainMagnitudeDb(f: number, fs: number, eq: CanonicalEq): numb
   return sum
 }
 
+/** Sample rate used when recomputing auto preamp before the audio context exists. */
+export const PREAMP_SCAN_FS = 48000
+
+/** Log-spaced bins from 20 Hz to just below Nyquist for cascade peak search. */
+export const PREAMP_GRID_POINTS = 768
+
+/**
+ * Max magnitude (dB) of the biquad chain with `preampDb` treated as 0 — i.e. how much the filters
+ * boost the spectrum at worst case among `pointCount` log-spaced frequencies.
+ */
+export function peakEqChainMagnitudeDb(
+  eq: CanonicalEq,
+  fs: number = PREAMP_SCAN_FS,
+  pointCount: number = PREAMP_GRID_POINTS,
+): number {
+  if (eq.eqBypass) return 0
+  const probe: CanonicalEq = { ...eq, preampDb: 0 }
+  const fMax = fs * 0.499
+  const freqs = logSpacedFrequencies(20, fMax, pointCount)
+  let peak = -Infinity
+  for (const f of freqs) {
+    const m = eqChainMagnitudeDb(f, fs, probe)
+    if (m > peak) peak = m
+  }
+  return Number.isFinite(peak) ? peak : 0
+}
+
+/** Preamp (≤ 0) so the full chain peak (including preamp) is ≤ 0 dB at sampled frequencies. */
+export function preampDbFromCascadePeak(
+  eq: CanonicalEq,
+  fs: number = PREAMP_SCAN_FS,
+  pointCount: number = PREAMP_GRID_POINTS,
+): number {
+  const peak = peakEqChainMagnitudeDb(eq, fs, pointCount)
+  return peak > 0 ? -peak : 0
+}
+
 export function logSpacedFrequencies(fMin: number, fMax: number, count: number): number[] {
   const lo = Math.log10(fMin)
   const hi = Math.log10(fMax)

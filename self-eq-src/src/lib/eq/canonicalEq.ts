@@ -2,6 +2,7 @@
  * Canonical EQ document: single source of truth for preview graph, persistence, and Peace export (Phase 7).
  */
 
+import { preampDbFromCascadePeak } from './biquadMagnitude'
 import {
   defaultLoudnessMatchDb,
   LOUDNESS_TEST_FREQS,
@@ -132,8 +133,8 @@ export function sortBandsForChain(bands: EqBand[]): EqBand[] {
 }
 
 /**
- * Negative preamp equal to the largest positive band gain (simple headroom rule from design doc).
- * Does not model series interaction; conservative enough for MVP.
+ * Legacy: negative preamp from max positive **band gainDb** only (ignores overlap on the curve).
+ * Prefer `preampDbFromCascadePeak` from `./biquadMagnitude` for headroom.
  */
 export function computePreampDb(bands: Pick<EqBand, 'gainDb'>[]): number {
   let maxBoost = 0
@@ -149,7 +150,7 @@ export function withAutoPreamp(eq: CanonicalEq): CanonicalEq {
     loudnessMatchDb[f] = Math.min(0, loudnessMatchDb[f])
   }
   const patched = { ...eq, loudnessMatchDb }
-  return { ...patched, preampDb: computePreampDb(allBandsForChain(patched)) }
+  return { ...patched, preampDb: preampDbFromCascadePeak(patched) }
 }
 
 export function defaultCanonicalEq(): CanonicalEq {

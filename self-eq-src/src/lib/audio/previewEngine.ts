@@ -55,9 +55,9 @@ export function createWhiteNoiseBuffer(ctx: BaseAudioContext, durationSec: numbe
   return buffer
 }
 
+import { preampDbFromCascadePeak } from '../eq/biquadMagnitude'
 import {
   allBandsForChain,
-  computePreampDb,
   defaultLoudnessMatchDb,
   type CanonicalEq,
   type EqBand,
@@ -307,21 +307,19 @@ export class PreviewAudioEngine {
   }
 
   applyBands(bands: EqBand[]): void {
-    const preampDb = computePreampDb(
-      allBandsForChain({
-        version: 1,
-        meta: {},
-        preampDb: 0,
-        userMasterGainDb: this.masterGainDb,
-        tiltDb: 0,
-        eqBypass: false,
-        loudnessSignalMode: 'narrowband',
-        loudnessMatchQMode: 'standard',
-        loudnessMatchDb: defaultLoudnessMatchDb(),
-        sweepNotches: [],
-        bands,
-      }),
-    )
+    const preampDb = preampDbFromCascadePeak({
+      version: 1,
+      meta: {},
+      preampDb: 0,
+      userMasterGainDb: this.masterGainDb,
+      tiltDb: 0,
+      eqBypass: false,
+      loudnessSignalMode: 'narrowband',
+      loudnessMatchQMode: 'standard',
+      loudnessMatchDb: defaultLoudnessMatchDb(),
+      sweepNotches: [],
+      bands,
+    })
     this.applyCanonicalEq({
       version: 1,
       meta: {},

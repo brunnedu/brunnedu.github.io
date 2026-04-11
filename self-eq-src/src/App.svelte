@@ -72,6 +72,37 @@
   let fileInput: HTMLInputElement | undefined = undefined
   let musicFileInput: HTMLInputElement | undefined = undefined
 
+  type WizardStepId = 'audio' | 'tilt' | 'loudness' | 'sweep' | 'peq' | 'wrapup'
+
+  const WIZARD_STEPS: { id: WizardStepId; title: string }[] = [
+    { id: 'audio', title: 'Audio & level' },
+    { id: 'tilt', title: 'Tilt (Phase 1)' },
+    { id: 'loudness', title: 'Loudness match' },
+    { id: 'sweep', title: 'Resonance sweep' },
+    { id: 'peq', title: 'Parametric EQ' },
+    { id: 'wrapup', title: 'Check & wrap-up' },
+  ]
+
+  let wizardStep = $state<WizardStepId>('audio')
+
+  function wizardStepIndex(): number {
+    return WIZARD_STEPS.findIndex((s) => s.id === wizardStep)
+  }
+
+  function goWizardNext() {
+    const i = wizardStepIndex()
+    if (i < WIZARD_STEPS.length - 1) wizardStep = WIZARD_STEPS[i + 1]!.id
+  }
+
+  function goWizardBack() {
+    const i = wizardStepIndex()
+    if (i > 0) wizardStep = WIZARD_STEPS[i - 1]!.id
+  }
+
+  function setWizardStep(id: WizardStepId) {
+    wizardStep = id
+  }
+
   function loudnessCalPayload() {
     return {
       playing: calPlaying,
@@ -532,11 +563,34 @@
   <header class="header">
     <h1>Self-EQ</h1>
     <p class="lede">
-      Self-EQ: all three calibration UIs — <strong>tilt</strong>, <strong>loudness matching</strong>, and
-      <strong>treble sweep</strong> (5–12 kHz) with resonance notches — plus parametric bands and JSON profiles.
+      Step through <strong>tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong> (5–12 kHz),
+      and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay visible on the
+      right (or above on small screens).
     </p>
   </header>
 
+  <nav class="wizard-nav" aria-label="Calibration steps">
+    <ol class="wizard-steps">
+      {#each WIZARD_STEPS as s, idx (s.id)}
+        <li>
+          <button
+            type="button"
+            class="wizard-step-btn"
+            class:wizard-step-active={wizardStep === s.id}
+            aria-current={wizardStep === s.id ? 'step' : undefined}
+            onclick={() => setWizardStep(s.id)}
+          >
+            <span class="wizard-step-num">{idx + 1}</span>
+            <span class="wizard-step-title">{s.title}</span>
+          </button>
+        </li>
+      {/each}
+    </ol>
+  </nav>
+
+  <div class="app-grid">
+    <div class="step-main">
+  {#if wizardStep === 'audio'}
   <section class="panel" aria-labelledby="audio-eng-heading">
     <h2 id="audio-eng-heading">Audio engine</h2>
     <p class="hint">
@@ -595,7 +649,8 @@
       </div>
     </details>
   </section>
-
+  {/if}
+  {#if wizardStep === 'tilt'}
   <section class="panel" aria-labelledby="phase1-heading">
     <h2 id="phase1-heading">Phase 1 — Spectral tilt (pink noise)</h2>
     <p class="hint">
@@ -627,7 +682,8 @@
       Bypass EQ (flat pink at master gain)
     </label>
   </section>
-
+  {/if}
+  {#if wizardStep === 'loudness'}
   <section class="panel" aria-labelledby="phase4-heading">
     <h2 id="phase4-heading">Phase 2 — Loudness matching (ear-gain)</h2>
     <p class="hint">
@@ -741,7 +797,8 @@
       <button type="button" class="small reset-band" onclick={resetLoudnessBand}>Reset this band</button>
     {/if}
   </section>
-
+  {/if}
+  {#if wizardStep === 'sweep'}
   <section class="panel" aria-labelledby="phase5-heading">
     <h2 id="phase5-heading">Phase 3 — Resonance sweep (5–12 kHz)</h2>
     <p class="hint">
@@ -855,7 +912,8 @@
       </div>
     {/if}
   </section>
-
+  {/if}
+  {#if wizardStep === 'peq'}
   <section class="panel" aria-labelledby="peq-heading">
     <h2 id="peq-heading">Parametric EQ chain</h2>
     <p class="hint">
@@ -930,38 +988,15 @@
 
     <button type="button" class="add-band" onclick={addBand}>Add band</button>
   </section>
-
-  <section class="panel" aria-labelledby="viz-heading">
-    <h2 id="viz-heading">Phase 6 — Target curve & Peace export</h2>
+  {/if}
+  {#if wizardStep === 'wrapup'}
+  <section class="panel" aria-labelledby="wrapup-heading">
+    <h2 id="wrapup-heading">Check & wrap-up</h2>
     <p class="hint">
-      Combined magnitude (preamp + biquad chain) at <strong>{plotSampleRate} Hz</strong> sample rate for the plot.
-      During a sweep, the vertical line follows the sweep; after <strong>Mark start</strong>, the shaded band spans
-      start → current sweep frequency. With <strong>prefers-reduced-motion</strong>, the cursor updates less often.
+      Optional: load a track you know well and A/B with <strong>Bypass EQ</strong> (Tilt step) at a fixed device volume.
+      Then save your profile from the panel on the right.
     </p>
-    <ResponsePlot
-      {eq}
-      sampleRate={plotSampleRate}
-      sweepCursorHz={sweepCursorHz}
-      markStartHz={markStartSample?.freqHz ?? null}
-      reducedMotion={reducedMotionPref}
-    />
-    <p class="hint peace-hint">
-      <strong>Peace / Equalizer APO</strong> export uses the same band order as the preview.
-      <code>sw-*</code> notches are written as <strong>PK</strong> with negative gain (not NO) so depth matches the
-      browser. Rounding and host sample rate may differ slightly from Web Audio; spot-check in Peace.
-    </p>
-    <div class="actions">
-      <button type="button" onclick={downloadPeaceTxt}>Download Peace / APO (.txt)</button>
-    </div>
-  </section>
-
-  <section class="panel" aria-labelledby="music-heading">
-    <h2 id="music-heading">Reference music (your file)</h2>
-    <p class="hint">
-      Load a short lossless or high-quality track you know well. It plays through the <strong>same EQ chain</strong> as
-      pink noise. Use <strong>Bypass EQ</strong> in Phase 1 to A/B timbre at a fixed device volume (in-app trim is
-      optional).
-    </p>
+    <h3 class="subheading-small" id="music-heading">Reference music</h3>
     <div class="actions">
       <button type="button" onclick={() => musicFileInput?.click()} disabled={contextLabel === 'suspended'}>
         Load audio file…
@@ -981,36 +1016,197 @@
     {#if musicStatus}
       <p class="import-msg" role="status">{musicStatus}</p>
     {/if}
-  </section>
-
-  <section class="panel" aria-labelledby="io-heading">
-    <h2 id="io-heading">Profile JSON</h2>
-    <p class="hint">
-      Includes <code>tiltDb</code>, <code>eqBypass</code>, <code>loudnessSignalMode</code>, <code>loudnessMatchQMode</code>,
-      <code>loudnessMatchDb</code> (cuts ≤ 0 dB),
-      <code>sweepNotches</code> (max {MAX_SWEEP_NOTCHES}), and <code>bands</code>. <code>eqBypass</code> is preview-only.
+    <h3 class="subheading-small">Recap — processing order</h3>
+    <p class="chain-preview" aria-label="Processing order">
+      {chainPreview.length ? chainPreview.join(' → ') : '(none)'}
     </p>
-    <div class="actions">
+    <p class="hint wrapup-json-hint">
+      Profile JSON includes <code>tiltDb</code>, <code>eqBypass</code>, <code>loudnessSignalMode</code>,
+      <code>loudnessMatchQMode</code>, <code>loudnessMatchDb</code>, <code>sweepNotches</code> (max {MAX_SWEEP_NOTCHES}),
+      and <code>bands</code>. <code>eqBypass</code> is preview-only.
+    </p>
+    <div class="actions wrapup-dup-actions" aria-label="Profile files (same as curve panel)">
       <button type="button" onclick={downloadJson}>Download JSON</button>
       <button type="button" onclick={triggerImport}>Import JSON…</button>
-      <input bind:this={fileInput} type="file" accept="application/json,.json" class="sr-only" onchange={onImportFile} />
+      <button type="button" onclick={downloadPeaceTxt}>Download Peace / APO (.txt)</button>
     </div>
-    {#if importMessage}
-      <p class="import-msg" role="status">{importMessage}</p>
-    {/if}
   </section>
+  {/if}
 
-  <footer class="footer">
-    <a href="../">← Site home</a>
-  </footer>
+      <div class="step-nav-row">
+        <button type="button" onclick={goWizardBack} disabled={wizardStepIndex() === 0}>← Back</button>
+        <button
+          type="button"
+          class="primary"
+          onclick={goWizardNext}
+          disabled={wizardStepIndex() === WIZARD_STEPS.length - 1}
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <aside class="side-panel" aria-label="Target curve and profile">
+      <h2 class="side-heading" id="viz-heading">Target curve</h2>
+      <p class="hint side-hint">
+        Magnitude at <strong>{plotSampleRate} Hz</strong>. Sweep cursor and mark band follow playback; with
+        <strong>prefers-reduced-motion</strong> the cursor updates less often.
+      </p>
+      <ResponsePlot
+        {eq}
+        sampleRate={plotSampleRate}
+        sweepCursorHz={sweepCursorHz}
+        markStartHz={markStartSample?.freqHz ?? null}
+        reducedMotion={reducedMotionPref}
+      />
+      <p class="side-meta">
+        Context: <code>{contextLabel}</code> · Preamp: <code>{eq.preampDb.toFixed(1)} dB</code>
+        {#if eq.eqBypass}
+          <span class="bypass-badge">not applied (bypass)</span>
+        {/if}
+      </p>
+      <p class="hint peace-hint side-peace">
+        <strong>Peace / APO:</strong> <code>sw-*</code> export as <strong>PK</strong> cuts so depth matches the browser;
+        spot-check in Peace.
+      </p>
+      <div class="actions side-actions">
+        <button type="button" onclick={downloadPeaceTxt}>Peace / APO (.txt)</button>
+        <button type="button" onclick={downloadJson}>JSON</button>
+        <button type="button" onclick={triggerImport}>Import…</button>
+      </div>
+      <input bind:this={fileInput} type="file" accept="application/json,.json" class="sr-only" onchange={onImportFile} />
+      {#if importMessage}
+        <p class="import-msg" role="status">{importMessage}</p>
+      {/if}
+    </aside>
+  </div>
 </main>
 
 <style>
   .shell {
-    max-width: 42rem;
+    max-width: 72rem;
     margin: 0 auto;
     padding: 1.5rem 1.25rem 3rem;
     text-align: left;
+  }
+
+  .wizard-nav {
+    margin-top: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wizard-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .wizard-step-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.4rem 0.65rem;
+    text-align: left;
+    max-width: 11.5rem;
+    line-height: 1.2;
+  }
+
+  .wizard-step-active {
+    background: var(--accent-bg);
+    border-color: var(--accent-border);
+    font-weight: 600;
+  }
+
+  .wizard-step-num {
+    font-size: 0.72rem;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+
+  .wizard-step-title {
+    font-size: 0.82rem;
+  }
+
+  .app-grid {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 34%);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 52rem) {
+    .app-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .side-panel {
+      order: -1;
+    }
+  }
+
+  .step-main {
+    min-width: 0;
+  }
+
+  .step-nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .side-panel {
+    position: sticky;
+    top: 0.75rem;
+    padding: 1rem 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+
+  .side-heading {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+  }
+
+  .side-hint {
+    font-size: 0.8rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .side-meta {
+    margin: 0.65rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .side-peace {
+    margin: 0.65rem 0 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  .side-actions {
+    margin-bottom: 0;
+  }
+
+  .wrapup-json-hint {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .wrapup-dup-actions {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border);
   }
 
   .header h1 {
@@ -1030,6 +1226,10 @@
     padding: 1.25rem 1.25rem 1.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
+  }
+
+  .app-grid .panel {
+    margin-top: 0;
   }
 
   .panel h2 {
@@ -1354,16 +1554,6 @@
     font-size: 0.8rem;
     color: var(--text);
     text-align: right;
-  }
-
-  .footer {
-    margin-top: 2rem;
-    font-size: 0.9rem;
-    color: var(--text);
-  }
-
-  .footer a {
-    color: var(--text-h);
   }
 
   .sr-only {
