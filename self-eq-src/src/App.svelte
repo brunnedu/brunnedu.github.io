@@ -2,13 +2,11 @@
   import { onDestroy, onMount, untrack } from 'svelte'
   import { PreviewAudioEngine } from './lib/audio/previewEngine'
   import {
-    allBandsForChain,
     CanonicalEqParseError,
     defaultCanonicalEq,
     newBandId,
     parseCanonicalEqJson,
     serializeCanonicalEq,
-    TILT_PIVOT_HZ,
     withAutoPreamp,
     type CanonicalEq,
     type EqBand,
@@ -28,8 +26,6 @@
     notchParamsFromMarkFrequencies,
     SWEEP_DURATION_PRESETS,
     type SweepDurationPreset,
-    SWEEP_F0_HZ,
-    SWEEP_F1_HZ,
   } from './lib/eq/sweep'
   import ResponsePlot from './lib/viz/ResponsePlot.svelte'
   import ChainInspector from './lib/viz/ChainInspector.svelte'
@@ -75,11 +71,11 @@
   type WizardStepId = 'listenTilt' | 'loudness' | 'sweep' | 'peq' | 'wrapup'
 
   const WIZARD_STEPS: { id: WizardStepId; title: string }[] = [
-    { id: 'listenTilt', title: 'Listening & tilt' },
-    { id: 'loudness', title: 'Loudness match' },
-    { id: 'sweep', title: 'Resonance sweep' },
+    { id: 'listenTilt', title: 'Listening & Tilt' },
+    { id: 'loudness', title: 'Loudness Match' },
+    { id: 'sweep', title: 'Treble Sweep' },
     { id: 'peq', title: 'Parametric EQ' },
-    { id: 'wrapup', title: 'Check & wrap-up' },
+    { id: 'wrapup', title: 'Export' },
   ]
 
   let wizardStep = $state<WizardStepId>('listenTilt')
@@ -110,20 +106,6 @@
       signalMode: eq.loudnessSignalMode,
     }
   }
-
-  const chainPreview = $derived(
-    eq.eqBypass
-      ? ['(flat — EQ bypassed)']
-      : allBandsForChain(eq).map((b) =>
-          b.id.startsWith('__tilt_')
-            ? `tilt:${b.type}@${Math.round(b.freqHz)}Hz`
-            : b.id.startsWith('__lm_')
-              ? `lm:${Math.round(b.freqHz)}Hz`
-              : b.id.startsWith('sw-')
-                ? `sw:${Math.round(b.freqHz)}Hz`
-                : `${b.type}@${Math.round(b.freqHz)}Hz`,
-        ),
-  )
 
   function syncEngine() {
     if (engine.getContextState() === 'suspended') return
@@ -614,9 +596,10 @@
   <header class="header">
     <h1>SelfEQ</h1>
     <p class="lede">
-      Step through <strong>listening & tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong>
-      (5–12 kHz), and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay below
-      each step. <strong>First tap or click</strong> anywhere unlocks audio.
+      Headphone EQ <strong>by ear</strong>: balance with pink noise, even out mid–treble loudness, catch harsh treble,
+      then fine-tune. The <strong>Target Curve</strong>, chain list, and export are <strong>below</strong> each step.
+      <strong>Tap Play</strong> (or any step that plays sound)
+      to start audio.
     </p>
   </header>
 
@@ -663,12 +646,10 @@
     <div class="step-main">
   {#if wizardStep === 'listenTilt'}
   <section class="panel" aria-labelledby="phase1-heading">
-    <h2 id="phase1-heading">Listening setup & spectral tilt</h2>
+    <h2 id="phase1-heading">Listening & Tilt</h2>
     <p class="hint">
-      <strong>First tap or click</strong> anywhere on the page starts the audio engine (browser requirement). Set
-      <strong>your device / system volume</strong> to a comfortable level once and keep it there for the whole session.
-      <strong>Preamp</strong> follows the combined EQ curve so boosts (including overlapping filters) are less likely to
-      clip.
+      Set <strong>device volume</strong> once for the session. Use <strong>Play pink</strong>, then adjust tilt until the
+      noise sounds evenly balanced—not dull, not piercing.
     </p>
 
     {#if errorMessage}
@@ -682,17 +663,14 @@
     </div>
 
     <p class="meta">
-      Context: <code>{contextLabel}</code> · Preamp: <code>{eq.preampDb.toFixed(1)} dB</code>
+      Preamp <span class="mono">{eq.preampDb.toFixed(1)} dB</span>
       {#if eq.eqBypass}
-        <span class="bypass-badge">not applied (bypass)</span>
+        <span class="bypass-badge">EQ off</span>
       {/if}
     </p>
 
     <p class="hint tilt-hint-after-pink">
-      Adjust until pink noise sounds like a balanced “waterfall” — not too dark, not too piercing. Tilt uses a low-Q
-      <strong>lowshelf</strong> and <strong>highshelf</strong> both at {TILT_PIVOT_HZ} Hz (half the tilt value each)
-      ahead of your parametric bands. Use <strong>Bypass EQ</strong> to compare flat playback at the same device
-      volume.
+      <strong>Bypass EQ</strong> compares flat sound at the same volume.
     </p>
     <div class="control">
       <label for="tilt">Tilt (dB)</label>
@@ -714,18 +692,16 @@
     </p>
     <label class="bypass-label">
       <input type="checkbox" checked={eq.eqBypass} onchange={() => toggleBypass()} />
-      Bypass EQ (flat pink at unity gain after preamp)
+      Bypass EQ (flat)
     </label>
   </section>
   {/if}
   {#if wizardStep === 'loudness'}
   <section class="panel" aria-labelledby="phase4-heading">
-    <h2 id="phase4-heading">Phase 2 — Loudness matching (ear-gain)</h2>
+    <h2 id="phase4-heading">Loudness Match</h2>
     <p class="hint">
-      Keep <strong>device volume</strong> fixed. Corrections are <strong>cuts only (≤ 0 dB)</strong> so you match by
-      attenuating each test band toward the reference — boosts would fight the preamp headroom rule and feel confusing.
-      Gain is applied only via the <strong>lm peaking band</strong> for that frequency. Stimulus is
-      <strong>1/3-octave</strong> noise by default or a <strong>sine</strong>. Pink and calibration cancel each other.
+      Keep <strong>device volume</strong> fixed. Play the tone, listen to <strong>reference</strong> vs each
+      <strong>test</strong> band, and use <strong>cuts only</strong> until loudness feels matched.
     </p>
     <div class="actions">
       <button
@@ -737,22 +713,22 @@
       </button>
     </div>
     <label class="signal-mode">
-      Stimulus
+      Sound
       <select value={eq.loudnessSignalMode} onchange={onLoudnessSignalModeChange}>
-        <option value="narrowband">Narrowband noise (1/3 oct)</option>
-        <option value="tone">Pure tone</option>
+        <option value="narrowband">Filtered noise</option>
+        <option value="tone">Sine tone</option>
       </select>
     </label>
     <label class="signal-mode">
-      Correction band width (Q)
+      Band width
       <select value={eq.loudnessMatchQMode} onchange={onLoudnessQModeChange}>
-        <option value="wide">Wide (gentlest)</option>
-        <option value="standard">Standard (default)</option>
-        <option value="narrow">Narrow (legacy)</option>
+        <option value="wide">Wide</option>
+        <option value="standard">Standard</option>
+        <option value="narrow">Narrow</option>
       </select>
     </label>
     <fieldset class="cal-route">
-      <legend>Route {comparisonLoopOn ? '(overridden while loop is on)' : ''}</legend>
+      <legend>Listen</legend>
       <label class="radio-row">
         <input
           type="radio"
@@ -826,24 +802,17 @@
         />
         s
       </label>
-      <p class="hint loop-hint">
-        While on, alternates <strong>reference</strong> and <strong>test</strong> for the same length each (the number
-        of seconds above). You can still pick the test band above; the loop overrides Reference / Test while it runs.
-      </p>
+      <p class="hint loop-hint">Alternates reference and test so you can compare without switching manually.</p>
     </div>
   </section>
   {/if}
   {#if wizardStep === 'sweep'}
   <section class="panel" aria-labelledby="phase5-heading">
-    <h2 id="phase5-heading">Phase 3 — Resonance sweep (5–12 kHz)</h2>
+    <h2 id="phase5-heading">Treble Sweep</h2>
     <p class="hint">
-      Log sine sweep <strong>{SWEEP_F0_HZ}–{SWEEP_F1_HZ} Hz</strong>. Pick <strong>duration</strong>, set
-      <strong>position</strong> on the slider (silent until you play — scrubbing does not start audio by itself). Use
-      <strong>Play sweep</strong> / <strong>Pause</strong> to run or stop the sweep from the current position; while
-      playing you can drag the slider to seek. <strong>Mark</strong> records start then end of a resonance (same
-      button, up to {MAX_SWEEP_NOTCHES} notches). <strong>Reset sweep</strong> stops audio and clears marks.
-      <code>sw-*</code> preview as peaking cuts; JSON keeps <code>type: notch</code>. Stops pink/cal while sweep audio
-      runs.
+      Play the sweep and listen for ringing or harsh spots. <strong>Mark start</strong> then <strong>Mark end</strong>
+      on the same peak (up to {MAX_SWEEP_NOTCHES} times). Use duration and the position slider to linger where it
+      bothers you.
     </p>
     <div class="sweep-duration-row" role="group" aria-label="Sweep duration">
       {#each SWEEP_DURATION_PRESETS as sec (sec)}
@@ -910,7 +879,7 @@
       <p class="sweep-msg" role="status">{sweepMessage}</p>
     {/if}
     {#if eq.sweepNotches.length > 0}
-      <h3 class="subheading-small">Sweep notches (refine)</h3>
+      <h3 class="subheading-small">Notches</h3>
       <div class="band-list">
         {#each eq.sweepNotches as notch (notch.id)}
           <fieldset class="band-card sweep-notch-card">
@@ -967,14 +936,8 @@
   {/if}
   {#if wizardStep === 'peq'}
   <section class="panel" aria-labelledby="peq-heading">
-    <h2 id="peq-heading">Parametric EQ chain</h2>
-    <p class="hint">
-      Order: tilt → loudness peaks + your shelves/peaking → sweep notches (<code>sw-*</code>) with other notches by
-      frequency. Preamp includes all boosts.
-    </p>
-    <p class="chain-preview" aria-label="Processing order">
-      Order: {chainPreview.length ? chainPreview.join(' → ') : '(none)'}
-    </p>
+    <h2 id="peq-heading">Parametric EQ</h2>
+    <p class="hint">Small moves. Prefer cuts. Order matches the chain list under the curve.</p>
 
     <div class="band-list">
       {#each eq.bands as band (band.id)}
@@ -1043,11 +1006,10 @@
   {/if}
   {#if wizardStep === 'wrapup'}
   <section class="panel" aria-labelledby="wrapup-heading">
-    <h2 id="wrapup-heading">Check & wrap-up</h2>
+    <h2 id="wrapup-heading">Export</h2>
     <p class="hint">
-      Optional: load a track you know well and A/B with <strong>Bypass EQ</strong> (Listening & tilt step) at a fixed
-      device volume.
-      Then save your profile from the target curve section below.
+      Optional: load a familiar track and A/B with <strong>Bypass EQ</strong> (Listening & Tilt). Export from the target section
+      below when you are done.
     </p>
     <h3 class="subheading-small" id="music-heading">Reference music</h3>
     <div class="actions">
@@ -1069,16 +1031,7 @@
     {#if musicStatus}
       <p class="import-msg" role="status">{musicStatus}</p>
     {/if}
-    <h3 class="subheading-small">Recap — processing order</h3>
-    <p class="chain-preview" aria-label="Processing order">
-      {chainPreview.length ? chainPreview.join(' → ') : '(none)'}
-    </p>
-    <p class="hint wrapup-json-hint">
-      Profile JSON includes <code>tiltDb</code>, <code>eqBypass</code>, <code>loudnessSignalMode</code>,
-      <code>loudnessMatchQMode</code>, <code>loudnessMatchDb</code>, <code>sweepNotches</code> (max {MAX_SWEEP_NOTCHES}),
-      <code>bands</code>, and optional <code>disabledChainIds</code>. <code>eqBypass</code> is preview-only.
-    </p>
-    <div class="actions wrapup-dup-actions" aria-label="Profile files (same as target curve section)">
+    <div class="actions wrapup-dup-actions" aria-label="Profile export">
       <button type="button" onclick={downloadJson}>Download JSON</button>
       <button type="button" onclick={triggerImport}>Import JSON…</button>
       <button type="button" onclick={downloadPeaceTxt}>Download Peace / APO (.txt)</button>
@@ -1088,11 +1041,8 @@
     </div>
 
     <aside class="side-panel" aria-label="Target curve and profile">
-      <h2 class="side-heading" id="viz-heading">Target curve</h2>
-      <p class="hint side-hint">
-        Magnitude at <strong>{plotSampleRate} Hz</strong>. Sweep cursor and mark band follow playback; with
-        <strong>prefers-reduced-motion</strong> the cursor updates less often.
-      </p>
+      <h2 class="side-heading" id="viz-heading">Target Curve</h2>
+      <p class="hint side-hint">Combined response. Use the chain list under the plot to turn bands on or off.</p>
       <ResponsePlot
         {eq}
         sampleRate={plotSampleRate}
@@ -1102,14 +1052,10 @@
       />
       <ChainInspector eq={eq} patch={(fn) => setEq(fn(eq))} />
       <p class="side-meta">
-        Context: <code>{contextLabel}</code> · Preamp: <code>{eq.preampDb.toFixed(1)} dB</code>
+        Preamp <span class="mono">{eq.preampDb.toFixed(1)} dB</span>
         {#if eq.eqBypass}
-          <span class="bypass-badge">not applied (bypass)</span>
+          <span class="bypass-badge">EQ off</span>
         {/if}
-      </p>
-      <p class="hint peace-hint side-peace">
-        <strong>Peace / APO:</strong> <code>sw-*</code> export as <strong>PK</strong> cuts so depth matches the browser;
-        spot-check in Peace.
       </p>
       <div class="actions side-actions">
         <button type="button" onclick={downloadPeaceTxt}>Peace / APO (.txt)</button>
@@ -1229,18 +1175,8 @@
     line-height: 1.45;
   }
 
-  .side-peace {
-    margin: 0.65rem 0 0.5rem;
-    font-size: 0.78rem;
-  }
-
   .side-actions {
     margin-bottom: 0;
-  }
-
-  .wrapup-json-hint {
-    margin-top: 1rem;
-    font-size: 0.85rem;
   }
 
   .wrapup-dup-actions {
@@ -1281,14 +1217,6 @@
     margin: 0 0 1rem;
     font-size: 0.9rem;
     line-height: 1.45;
-  }
-
-  .chain-preview {
-    margin: 0 0 1rem;
-    font-size: 0.8rem;
-    color: var(--text);
-    line-height: 1.4;
-    word-break: break-word;
   }
 
   .error {
@@ -1346,10 +1274,6 @@
 
   .meta {
     margin: 0 0 1rem;
-    font-size: 0.85rem;
-  }
-
-  .meta code {
     font-size: 0.85rem;
   }
 

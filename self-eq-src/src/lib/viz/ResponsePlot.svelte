@@ -184,10 +184,7 @@
 
 <div class="plot-wrap">
   {#if eq.eqBypass}
-    <p class="plot-note">EQ bypassed — flat response (plot shows 0 dB shaping).</p>
-  {/if}
-  {#if reducedMotion && sweepCursorHz != null}
-    <p class="plot-note reduced">Reduced motion: sweep cursor updates at a lower rate.</p>
+    <p class="plot-note">EQ off — flat line.</p>
   {/if}
   <div class="plot-svg-host" bind:this={svgHostEl}></div>
 </div>
@@ -210,7 +207,4 @@
     line-height: 1.35;
   }
 
-  .plot-note.reduced {
-    font-style: italic;
-  }
 </style>

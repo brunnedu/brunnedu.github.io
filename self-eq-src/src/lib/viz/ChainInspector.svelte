@@ -28,11 +28,13 @@
   const disabled = $derived(new Set(eq.disabledChainIds ?? []))
 
   function rowTitle(band: EqBand): string {
-    if (band.id.startsWith('__tilt_low')) return `Tilt · lowshelf @ ${TILT_PIVOT_HZ} Hz`
-    if (band.id.startsWith('__tilt_high')) return `Tilt · highshelf @ ${TILT_PIVOT_HZ} Hz`
+    if (band.id.startsWith('__tilt_low')) return `Tilt · Lowshelf @ ${TILT_PIVOT_HZ} Hz`
+    if (band.id.startsWith('__tilt_high')) return `Tilt · Highshelf @ ${TILT_PIVOT_HZ} Hz`
     if (band.id.startsWith('__lm_')) return `Loudness · ${Math.round(band.freqHz)} Hz`
     if (band.id.startsWith('sw-')) return 'Sweep notch'
-    return `PEQ · ${band.type}`
+    const t = band.type
+    const typeLabel = t === 'lowshelf' ? 'Lowshelf' : t === 'highshelf' ? 'Highshelf' : t === 'peaking' ? 'Peaking' : 'Notch'
+    return `Band · ${typeLabel}`
   }
 
   function rowRole(band: EqBand): 'tilt' | 'loudness' | 'sweep' | 'user' {
@@ -87,14 +89,13 @@
 </script>
 
 <div class="chain-inspector" aria-labelledby="chain-heading">
-  <h3 id="chain-heading" class="chain-heading">Processing chain</h3>
+  <h3 id="chain-heading" class="chain-heading">Chain</h3>
   {#if eq.eqBypass}
-    <p class="chain-bypass-note">Full EQ bypass is on — curve is flat for preview.</p>
+    <p class="chain-bypass-note">EQ bypass on — flat curve.</p>
   {/if}
   <div class="chain-preamp" role="group" aria-label="Preamp">
     <span class="chain-preamp-label">Preamp</span>
     <span class="chain-preamp-val mono">{eq.preampDb.toFixed(1)} dB</span>
-    <span class="chain-preamp-hint">auto headroom</span>
   </div>
   <ul class="chain-list">
     {#each rows as band (band.id)}
@@ -233,7 +234,7 @@
               </label>
             </div>
           {:else if role === 'tilt'}
-            <p class="chain-hint">Use <strong>Listening & tilt</strong> to change tilt.</p>
+            <p class="chain-hint">Change tilt in Listening & Tilt.</p>
           {/if}
         </div>
       </li>
@@ -286,11 +287,6 @@
   .chain-preamp-val {
     font-variant-numeric: tabular-nums;
     color: var(--text-h);
-  }
-
-  .chain-preamp-hint {
-    font-size: 0.72rem;
-    color: var(--text);
   }
 
   .mono {
@@ -469,9 +465,5 @@
     font-size: 0.68rem;
     color: var(--text);
     line-height: 1.35;
-  }
-
-  .chain-hint strong {
-    color: var(--text-h);
   }
 </style>
