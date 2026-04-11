@@ -1,30 +1,37 @@
 <script>
-  import { sessionStore } from '../stores.js';
-  import { setMatchScore } from '../stores.js';
+  import {
+    sessionStore,
+    applyCurrentSlots,
+    saveCurrentMatchResult,
+    updateCompletedMatchScore,
+    getActiveMatchPairing,
+    getSuggestedNextThree,
+    deriveRoundState,
+    matchKey,
+  } from '../stores.js';
+  import { generateAllMatchups } from '../scheduler.js';
   import MatchCard from './MatchCard.svelte';
   import ScoreEntry from './ScoreEntry.svelte';
   import Standings from './Standings.svelte';
   import ExportButton from './ExportButton.svelte';
+  import CurrentMatchPicker from './CurrentMatchPicker.svelte';
 
   let editingGame = $state(null);
   let editingSets = $state(null);
+  let pickerOpen = $state(false);
 
-  const totalMatches = $derived($sessionStore.matches.length);
-  const playedCount = $derived(
-    $sessionStore.matches.filter((m) => m.sets && m.winner).length
+  const totalCanonical = $derived(
+    generateAllMatchups($sessionStore.players).length
   );
-  const currentMatch = $derived(
-    $sessionStore.matches.find((m) => !m.sets || !m.winner)
+  const playedCount = $derived($sessionStore.completed.length);
+  const roundMeta = $derived(
+    deriveRoundState($sessionStore.players, $sessionStore.completed)
   );
-  const completedMatches = $derived(
-    $sessionStore.matches.filter((m) => m.sets && m.winner)
-  );
-  /** Most recent first; each row still shows schedule game number. */
+  const activeMatch = $derived(getActiveMatchPairing($sessionStore));
+  const suggestedNext = $derived(getSuggestedNextThree($sessionStore));
+  const completedMatches = $derived($sessionStore.completed);
   const completedMatchesDisplayed = $derived(
     [...completedMatches].reverse()
-  );
-  const upcomingMatches = $derived(
-    $sessionStore.matches.filter((m) => !m.sets || !m.winner).slice(1, 4)
   );
   const bestOf = $derived($sessionStore.bestOf);
   const canExport = $derived(playedCount >= 1);
@@ -40,58 +47,89 @@
   }
 
   function handleSaveScore(sets, winner) {
-    if (!currentMatch) return;
-    setMatchScore(currentMatch.game, sets, winner);
+    if (!activeMatch) return;
+    saveCurrentMatchResult(sets, winner);
+    pickerOpen = false;
   }
 
   function handleEditSave(sets, winner) {
     if (editingGame == null) return;
-    setMatchScore(editingGame, sets, winner);
+    updateCompletedMatchScore(editingGame, sets, winner);
     closeEdit();
+  }
+
+  function handleSlotsChange(slots) {
+    applyCurrentSlots(slots);
+  }
+
+  function scoreEntryFormKey() {
+    if (!activeMatch) return 'cur';
+    return `cur-${playedCount}-${matchKey(activeMatch)}`;
   }
 </script>
 
 <section class="session-dashboard">
   <div class="session-header">
-    <div class="session-header-top">
-      <h2 class="section-title">
-        Game {currentMatch ? playedCount + 1 : playedCount} / {totalMatches}
-      </h2>
-      <ExportButton
-        session={$sessionStore}
-        disabled={!canExport}
-      />
-    </div>
-    <div class="progress-bar">
-      <div
-        class="progress-fill"
-        style="width: {totalMatches ? (playedCount / totalMatches) * 100 : 0}%"
-      ></div>
+    <div class="session-header-brand">
+      <div class="session-header-top">
+        <div class="session-header-text">
+          <h2 class="session-brand-title">SmashUp</h2>
+          {#if totalCanonical > 0}
+            <p class="session-meta-line">{totalCanonical} match-ups</p>
+          {/if}
+          {#if roundMeta.suggestionRound > 1}
+            <p class="session-round-line">Round {roundMeta.suggestionRound}</p>
+          {/if}
+        </div>
+        <div class="session-header-actions">
+          <ExportButton
+            session={$sessionStore}
+            disabled={!canExport}
+          />
+        </div>
+      </div>
     </div>
   </div>
 
-  {#if currentMatch}
+  {#if activeMatch}
     <div class="current-match card">
       <h3>Now Playing</h3>
-      <MatchCard match={currentMatch} />
+      <button
+        type="button"
+        class="current-match-tap"
+        onclick={() => (pickerOpen = !pickerOpen)}
+        aria-expanded={pickerOpen}
+      >
+        <MatchCard match={activeMatch} />
+        <span class="current-match-tap-hint">
+          {pickerOpen ? 'Hide lineup' : 'Tap to set lineup'}
+        </span>
+      </button>
+      {#if pickerOpen}
+        <CurrentMatchPicker
+          players={$sessionStore.players}
+          pairing={activeMatch}
+          onSlotsChange={handleSlotsChange}
+        />
+      {/if}
       <ScoreEntry
         bestOf={bestOf}
-        formKey={`cur-${currentMatch.game}`}
+        formKey={scoreEntryFormKey()}
         onSave={handleSaveScore}
       />
     </div>
   {/if}
 
-  {#if upcomingMatches.length > 0}
+  {#if suggestedNext.length > 0}
     <div class="upcoming">
-      <h3>Up Next</h3>
-      {#each upcomingMatches as match}
+      <h3>Suggested next</h3>
+      {#each suggestedNext as match}
         <MatchCard match={match} compact />
       {/each}
     </div>
   {/if}
 
-  <Standings matches={$sessionStore.matches} players={$sessionStore.players} />
+  <Standings matches={$sessionStore.completed} players={$sessionStore.players} />
 
   {#if completedMatches.length > 0}
     <div class="completed">

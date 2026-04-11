@@ -3,7 +3,10 @@
 export const STORAGE_SESSION = 'smashup:session';
 export const STORAGE_UI = 'smashup:ui';
 export const SESSION_TAB = 'smashup:active-tab';
-export const SCHEMA_VERSION = 1;
+
+/** v2: completed history + optional draft; no pre-baked future schedule. */
+export const SESSION_SCHEMA_VERSION = 2;
+export const UI_SCHEMA_VERSION = 1;
 
 /**
  * Same document navigation (reload) keeps sessionStorage; closing tab / PWA clears it.
@@ -28,11 +31,19 @@ export function readSavedSession() {
     const raw = localStorage.getItem(STORAGE_SESSION);
     if (!raw) return null;
     const p = JSON.parse(raw);
-    if (p.version !== SCHEMA_VERSION || !Array.isArray(p.matches)) return null;
+    if (p.version !== SESSION_SCHEMA_VERSION) return null;
+    if (!Array.isArray(p.players) || !Array.isArray(p.completed)) return null;
     return {
-      players: Array.isArray(p.players) ? p.players : [],
+      players: p.players,
       bestOf: !!p.bestOf,
-      matches: p.matches,
+      completed: p.completed,
+      draftMatch:
+        p.draftMatch?.teamA && p.draftMatch?.teamB
+          ? {
+              teamA: [...p.draftMatch.teamA],
+              teamB: [...p.draftMatch.teamB],
+            }
+          : null,
       date: typeof p.date === 'string' ? p.date : '',
     };
   } catch {
@@ -45,7 +56,7 @@ export function readSavedUi() {
     const raw = localStorage.getItem(STORAGE_UI);
     if (!raw) return null;
     const p = JSON.parse(raw);
-    if (p.version !== SCHEMA_VERSION) return null;
+    if (p.version !== UI_SCHEMA_VERSION) return null;
     return {
       screen: p.screen === 'session' ? 'session' : 'setup',
       players: Array.isArray(p.players) ? p.players : [],
@@ -58,21 +69,22 @@ export function readSavedUi() {
 
 export function hasSavedSession() {
   const s = readSavedSession();
-  return !!(s && s.matches.length > 0);
+  return !!(s && s.players.length >= 4 && s.date);
 }
 
 export function persistSessionState(state) {
-  if (!state.matches?.length) {
+  if (!state.players?.length || state.players.length < 4) {
     localStorage.removeItem(STORAGE_SESSION);
     return;
   }
   localStorage.setItem(
     STORAGE_SESSION,
     JSON.stringify({
-      version: SCHEMA_VERSION,
+      version: SESSION_SCHEMA_VERSION,
       players: state.players,
       bestOf: state.bestOf,
-      matches: state.matches,
+      completed: state.completed,
+      draftMatch: state.draftMatch,
       date: state.date,
     })
   );
@@ -82,7 +94,7 @@ export function persistUiState({ screen, players, bestOf }) {
   localStorage.setItem(
     STORAGE_UI,
     JSON.stringify({
-      version: SCHEMA_VERSION,
+      version: UI_SCHEMA_VERSION,
       screen,
       players: [...players],
       bestOf,
@@ -93,21 +105,4 @@ export function persistUiState({ screen, players, bestOf }) {
 export function clearAllPersisted() {
   localStorage.removeItem(STORAGE_SESSION);
   localStorage.removeItem(STORAGE_UI);
-}
-
-/** Deep clone saved session into a store-safe snapshot. */
-export function cloneSessionForStore(s) {
-  if (!s?.matches?.length) return null;
-  return {
-    players: [...s.players],
-    bestOf: !!s.bestOf,
-    matches: s.matches.map((m) => ({
-      game: m.game,
-      teamA: [...m.teamA],
-      teamB: [...m.teamB],
-      ...(m.sets?.length ? { sets: m.sets.map((st) => ({ scoreA: st.scoreA, scoreB: st.scoreB })) } : {}),
-      ...(m.winner ? { winner: m.winner } : {}),
-    })),
-    date: s.date,
-  };
 }

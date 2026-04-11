@@ -26,7 +26,8 @@ export function generateAllMatchups(players) {
   return matchups;
 }
 
-function matchKey(m) {
+/** Canonical key for a doubles matchup (order-insensitive across teams). */
+export function matchKey(m) {
   const t1 = [...m.teamA].sort().join(',');
   const t2 = [...m.teamB].sort().join(',');
   return [t1, t2].sort().join(' vs ');
@@ -37,15 +38,29 @@ function partnershipKey(p1, p2) {
 }
 
 /**
- * Schedule all matchups in fair order.
- *
- * Hard constraint: every matchup is played exactly once.
- * Primary optimization: minimize sit-out imbalance — at any point in the
- * schedule, the difference between the most and least sat-out player
- * should be as small as possible.
- * Secondary optimization: maximize partnership diversity early.
+ * Update sit-out and partnership tallies as if `m` was just played.
  */
-export function scheduleFairRotation(matchups, players) {
+function applyMatchToStats(m, players, sitCount, partnershipCount) {
+  const playing = new Set([...m.teamA, ...m.teamB]);
+  for (const p of players) {
+    if (!playing.has(p)) {
+      sitCount.set(p, sitCount.get(p) + 1);
+    }
+  }
+  for (const pair of [m.teamA, m.teamB]) {
+    const pk = partnershipKey(pair[0], pair[1]);
+    partnershipCount.set(pk, (partnershipCount.get(pk) ?? 0) + 1);
+  }
+}
+
+/**
+ * Schedule matchups in fair order, optionally continuing stats from completed history.
+ *
+ * @param {Array} matchups - pool to order (e.g. remaining canonical games)
+ * @param {string[]} players - roster
+ * @param {{ completedHistory?: Array<{ teamA: string[], teamB: string[] }> }} options
+ */
+export function scheduleFairRotation(matchups, players, options = {}) {
   if (matchups.length === 0) return [];
 
   const remaining = new Map();
@@ -55,8 +70,16 @@ export function scheduleFairRotation(matchups, players) {
 
   const sitCount = new Map(players.map((p) => [p, 0]));
   const partnershipCount = new Map();
-  const schedule = [];
   let rrIndex = 0;
+
+  const history = options.completedHistory ?? [];
+  for (const m of history) {
+    if (!m?.teamA?.length || !m?.teamB?.length) continue;
+    applyMatchToStats(m, players, sitCount, partnershipCount);
+    rrIndex++;
+  }
+
+  const schedule = [];
 
   while (remaining.size > 0) {
     let bestMatch = null;
@@ -67,7 +90,6 @@ export function scheduleFairRotation(matchups, players) {
       const playing = new Set([...m.teamA, ...m.teamB]);
       const sitters = players.filter((p) => !playing.has(p));
 
-      // Simulate sit-out counts after this match
       let maxSit = 0;
       let minSit = Infinity;
       for (const p of players) {
@@ -77,28 +99,23 @@ export function scheduleFairRotation(matchups, players) {
       }
       const sitDiff = maxSit - minSit;
 
-      // Prefer sitters who have sat out the least (round-robin tie-break)
       let sitPriority = 0;
       for (const p of sitters) {
         sitPriority += sitCount.get(p);
       }
 
-      // Round-robin tie-break: prefer when sitters match the current rr slot
       let rrBonus = 0;
       for (const p of sitters) {
         const idx = players.indexOf(p);
         if (idx === rrIndex % players.length) rrBonus += 1;
       }
 
-      // Partnership novelty
       let newPairs = 0;
       for (const pair of [m.teamA, m.teamB]) {
         const pk = partnershipKey(pair[0], pair[1]);
         if (!partnershipCount.get(pk)) newPairs++;
       }
 
-      // Score: minimize sit-out diff (most important), then prefer low
-      // sit-count sitters, then rr bonus, then partnership novelty
       const score =
         -sitDiff * 10000 +
         -sitPriority * 100 +
@@ -112,19 +129,10 @@ export function scheduleFairRotation(matchups, players) {
       }
     }
 
-    schedule.push({ teamA: bestMatch.teamA, teamB: bestMatch.teamB });
+    schedule.push({ teamA: [...bestMatch.teamA], teamB: [...bestMatch.teamB] });
     remaining.delete(bestKey);
 
-    const playing = new Set([...bestMatch.teamA, ...bestMatch.teamB]);
-    for (const p of players) {
-      if (!playing.has(p)) {
-        sitCount.set(p, sitCount.get(p) + 1);
-      }
-    }
-    for (const pair of [bestMatch.teamA, bestMatch.teamB]) {
-      const pk = partnershipKey(pair[0], pair[1]);
-      partnershipCount.set(pk, (partnershipCount.get(pk) ?? 0) + 1);
-    }
+    applyMatchToStats(bestMatch, players, sitCount, partnershipCount);
     rrIndex++;
   }
 

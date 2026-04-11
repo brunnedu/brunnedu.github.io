@@ -1,14 +1,13 @@
 <script>
   import SetupScreen from './lib/components/SetupScreen.svelte';
   import SessionDashboard from './lib/components/SessionDashboard.svelte';
-  import { sessionStore, initSession, resetSession } from './lib/stores.js';
-  import { generateAllMatchups, scheduleFairRotation } from './lib/scheduler.js';
+  import { sessionStore, initSession, resetSession, normalizeSessionState } from './lib/stores.js';
+  import { generateAllMatchups } from './lib/scheduler.js';
   import {
     getBootstrapHydration,
     hasSavedSession,
     readSavedSession,
     persistUiState,
-    cloneSessionForStore,
   } from './lib/sessionPersistence.js';
 
   const boot = getBootstrapHydration();
@@ -18,9 +17,8 @@
   let bestOf = $state(false);
   let showColdResume = $state(false);
 
-  if (boot.mode === 'same-tab' && boot.session?.matches?.length) {
-    const cloned = cloneSessionForStore(boot.session);
-    if (cloned) sessionStore.set(cloned);
+  if (boot.mode === 'same-tab' && boot.session?.players?.length >= 4 && boot.session?.date) {
+    sessionStore.set(normalizeSessionState(boot.session));
     const ui = boot.ui;
     if (ui?.screen === 'session') {
       screen = 'session';
@@ -43,18 +41,16 @@
   });
 
   function handleGenerateSchedule() {
-    const matchups = generateAllMatchups(players);
-    const scheduled = scheduleFairRotation(matchups, players);
-    initSession(players, bestOf, scheduled);
+    if (players.length < 4) return;
+    initSession(players, bestOf);
     screen = 'session';
     showColdResume = false;
   }
 
   function resumeLastSession() {
     const s = readSavedSession();
-    const cloned = cloneSessionForStore(s);
-    if (!cloned) return;
-    sessionStore.set(cloned);
+    if (!s) return;
+    sessionStore.set(normalizeSessionState(s));
     screen = 'session';
     showColdResume = false;
   }

@@ -10,7 +10,7 @@
         date: session.date,
         players: session.players,
         bestOf: session.bestOf ? 3 : 1,
-        matches: session.matches
+        matches: (session.completed ?? [])
           .filter((m) => m.sets && m.winner)
           .map((m) => ({
             game: m.game,
