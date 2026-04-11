@@ -16,8 +16,9 @@ function fmtGain(db: number): string {
   return `${s} dB`
 }
 
+/** Q as in Room EQ Wizard / AutoEQ exports (two decimals) for Peace import compatibility. */
 function fmtQ(q: number): string {
-  return q.toFixed(2).replace(/\.?0+$/, '')
+  return Math.max(q, 0.01).toFixed(2)
 }
 
 type PeaceKind = 'LSC' | 'HSC' | 'PK' | 'NO'
@@ -45,38 +46,33 @@ function bandToPeaceLine(band: EqBand): { kind: PeaceKind; fc: string; gainDb: n
 }
 
 /**
- * Build a Peace / Equalizer APO compatible config body.
- * Notes in DETAILED_PLAN: sample rate, coefficient rounding vs Web Audio.
+ * Build a Peace / Equalizer APO compatible config body (no `#` lines — Peace import is strict).
+ * Format matches Equalizer APO wiki: `Preamp: … dB` and `Filter n: ON …` with 1-based indices.
+ * Notch (`NO`) lines omit `Gain` (not in the APO parameter table for NO).
+ * @see https://sourceforge.net/p/equalizerapo/wiki/Configuration%20reference/
  */
+function filterLine(
+  index: number,
+  row: { kind: PeaceKind; fc: string; gainDb: number; q: number },
+): string {
+  const head = `Filter ${index}: ON ${row.kind} Fc ${row.fc}`
+  if (row.kind === 'NO') {
+    return `${head} Q ${fmtQ(row.q)}`
+  }
+  return `${head} Gain ${fmtGain(row.gainDb)} Q ${fmtQ(row.q)}`
+}
+
 export function exportPeaceTxt(eq: CanonicalEq): string {
-  const lines: string[] = [
-    '# SelfEQ export — Equalizer APO / Peace',
-    '# Order matches preview: tilt shelves, then shelves/peaking/notches by chain policy.',
-    '# sw-* notches: exported as PK (negative gain) to match browser preview; JSON keeps type "notch".',
-    '',
-    `Preamp: ${eq.preampDb.toFixed(1)} dB`,
-    '',
-  ]
+  const lines: string[] = [`Preamp: ${eq.preampDb.toFixed(1)} dB`]
 
   const ordered = allBandsForChain(eq)
-  let n = 0
+  let index = 0
   for (const band of ordered) {
     const row = bandToPeaceLine(band)
     if (!row) continue
-    n += 1
-    lines.push(
-      `Filter: ON ${row.kind} Fc ${row.fc} Gain ${fmtGain(row.gainDb)} Q ${fmtQ(row.q)}`,
-    )
+    index += 1
+    lines.push(filterLine(index, row))
   }
 
-  if (n === 0) {
-    lines.push('# (no biquad filters — preamp only)')
-    lines.push('')
-  }
-
-  lines.push(
-    '',
-    '# userMasterGainDb is preview-only listening level — not applied here.',
-  )
-  return lines.join('\n')
+  return `${lines.join('\n')}\n`
 }
