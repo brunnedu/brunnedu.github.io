@@ -1,4 +1,8 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import {
+  clearAllPersisted,
+  persistSessionState,
+} from './sessionPersistence.js';
 
 const initialState = {
   players: [],
@@ -10,7 +14,7 @@ const initialState = {
 export const sessionStore = writable(initialState);
 
 export function initSession(players, bestOf, scheduledMatches) {
-  sessionStore.set({
+  const state = {
     players: [...players],
     bestOf,
     matches: scheduledMatches.map((m, i) => ({
@@ -19,7 +23,9 @@ export function initSession(players, bestOf, scheduledMatches) {
       teamB: [...m.teamB],
     })),
     date: new Date().toISOString().slice(0, 10),
-  });
+  };
+  sessionStore.set(state);
+  persistSessionState(state);
 }
 
 export function setMatchScore(gameIndex, sets, winner) {
@@ -30,8 +36,10 @@ export function setMatchScore(gameIndex, sets, winner) {
     matches[idx] = { ...matches[idx], sets, winner };
     return { ...s, matches };
   });
+  persistSessionState(get(sessionStore));
 }
 
 export function resetSession() {
+  clearAllPersisted();
   sessionStore.set(initialState);
 }

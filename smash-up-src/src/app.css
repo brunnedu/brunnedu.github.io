@@ -44,6 +44,43 @@ body {
   padding: 1.5rem 1rem 1.25rem;
 }
 
+.cold-resume-banner {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.cold-resume-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.cold-resume-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-text-danger {
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #c0392b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  min-height: 44px;
+  text-decoration: underline;
+  touch-action: manipulation;
+}
+
+.btn-text-danger:hover {
+  color: #922b21;
+}
+
 .landing-title {
   font-size: 2.25rem;
   font-weight: 700;
