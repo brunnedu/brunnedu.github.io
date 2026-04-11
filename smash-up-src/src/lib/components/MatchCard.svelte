@@ -1,5 +1,10 @@
 <script>
-  let { match, winner = null, compact = false } = $props();
+  let {
+    match,
+    winner = null,
+    compact = false,
+    showGameIndex = false,
+  } = $props();
 </script>
 
 <div
@@ -8,6 +13,9 @@
   class:winner-a={winner === 'A'}
   class:winner-b={winner === 'B'}
 >
+  {#if showGameIndex}
+    <div class="match-game-index">Game {match.game}</div>
+  {/if}
   <div class="match-teams">
     <span class="team team-a">{match.teamA.join(' & ')}</span>
     <span class="vs">vs</span>
