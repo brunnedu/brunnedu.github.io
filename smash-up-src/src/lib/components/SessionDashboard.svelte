@@ -102,7 +102,7 @@
       >
         <MatchCard match={activeMatch} />
         <span class="current-match-tap-hint">
-          {pickerOpen ? 'Hide lineup' : 'Tap to set lineup'}
+          {pickerOpen ? 'Hide' : 'Choose players'}
         </span>
       </button>
       {#if pickerOpen}

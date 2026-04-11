@@ -10,6 +10,10 @@
   let inputValue = $state('');
   let showSuggestions = $state(false);
   let suggestions = $state([]);
+  /** @type {HTMLDivElement | null} */
+  let wrapperEl = $state(null);
+  /** @type {HTMLInputElement | null} */
+  let inputEl = $state(null);
 
   const MIN_PLAYERS = 4;
   const MAX_PLAYERS = 12;
@@ -41,7 +45,7 @@
     players = [...players, trimmed];
     addRecentPlayer(trimmed);
     inputValue = '';
-    showSuggestions = false;
+    updateSuggestions();
   }
 
   function removePlayer(name) {
@@ -59,13 +63,17 @@
     updateSuggestions();
   }
 
-  function handleBlur() {
-    setTimeout(() => (showSuggestions = false), 150);
+  /** Close list only when focus leaves the input + suggestions area. */
+  function handleWrapperFocusOut(e) {
+    const next = /** @type {Node | null} */ (e.relatedTarget);
+    if (next && wrapperEl?.contains(next)) return;
+    showSuggestions = false;
   }
 
   function selectSuggestion(name, e) {
     if (e) e.preventDefault();
     addPlayer(name);
+    queueMicrotask(() => inputEl?.focus());
   }
 
   function handleGenerate() {
@@ -78,15 +86,19 @@
   <h2 class="section-title">Who's Playing?</h2>
 
   <div class="input-row">
-    <div class="input-wrapper">
+    <div
+      class="input-wrapper"
+      bind:this={wrapperEl}
+      onfocusout={handleWrapperFocusOut}
+    >
       <input
         type="text"
         placeholder="Add player name..."
+        bind:this={inputEl}
         bind:value={inputValue}
         oninput={handleInput}
         onkeydown={handleKeydown}
         onfocus={updateSuggestions}
-        onblur={handleBlur}
         aria-label="Player name"
       />
       {#if showSuggestions}
