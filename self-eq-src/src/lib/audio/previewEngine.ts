@@ -111,17 +111,12 @@ export class PreviewAudioEngine {
   private musicSource: AudioBufferSourceNode | null = null
 
   private masterGainDb = 0
-  private levelLocked = false
   private pinkAudible = false
   /** While true, pink is forced silent so calibration tones are audible. */
   private pinkSuppressedForCal = false
 
   getMasterGainDb(): number {
     return this.masterGainDb
-  }
-
-  isLevelLocked(): boolean {
-    return this.levelLocked
   }
 
   isPinkAudible(): boolean {
@@ -311,7 +306,7 @@ export class PreviewAudioEngine {
       version: 1,
       meta: {},
       preampDb: 0,
-      userMasterGainDb: this.masterGainDb,
+      userMasterGainDb: 0,
       tiltDb: 0,
       eqBypass: false,
       loudnessSignalMode: 'narrowband',
@@ -324,7 +319,7 @@ export class PreviewAudioEngine {
       version: 1,
       meta: {},
       preampDb,
-      userMasterGainDb: this.masterGainDb,
+      userMasterGainDb: 0,
       tiltDb: 0,
       eqBypass: false,
       loudnessSignalMode: 'narrowband',
@@ -363,7 +358,6 @@ export class PreviewAudioEngine {
   }
 
   setMasterGainDb(db: number): void {
-    if (this.levelLocked) return
     this.masterGainDb = db
     if (this.masterGain) {
       this.masterGain.gain.value = dbToLinear(db)
@@ -371,17 +365,7 @@ export class PreviewAudioEngine {
   }
 
   setUserMasterFromCanonical(userMasterGainDb: number): void {
-    if (this.levelLocked) return
     this.setMasterGainDb(userMasterGainDb)
-  }
-
-  lockLevel(): void {
-    if (!this.ctx) return
-    this.levelLocked = true
-  }
-
-  unlockLevel(): void {
-    this.levelLocked = false
   }
 
   setPinkAudible(audible: boolean): void {
@@ -629,6 +613,5 @@ export class PreviewAudioEngine {
     this.sweepManualAudible = false
     this.pinkAudible = false
     this.pinkSuppressedForCal = false
-    this.levelLocked = false
   }
 }

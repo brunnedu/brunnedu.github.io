@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, untrack } from 'svelte'
+  import { onDestroy, onMount, untrack } from 'svelte'
   import { PreviewAudioEngine } from './lib/audio/previewEngine'
   import {
     allBandsForChain,
@@ -41,7 +41,6 @@
   let errorMessage = $state<string | null>(null)
   let importMessage = $state<string | null>(null)
   let pinkPlaying = $state(false)
-  let levelLocked = $state(false)
 
   let calPlaying = $state(false)
   let calRoute = $state<LoudnessCalRoute>('reference')
@@ -72,18 +71,17 @@
   let fileInput: HTMLInputElement | undefined = undefined
   let musicFileInput: HTMLInputElement | undefined = undefined
 
-  type WizardStepId = 'audio' | 'tilt' | 'loudness' | 'sweep' | 'peq' | 'wrapup'
+  type WizardStepId = 'listenTilt' | 'loudness' | 'sweep' | 'peq' | 'wrapup'
 
   const WIZARD_STEPS: { id: WizardStepId; title: string }[] = [
-    { id: 'audio', title: 'Audio & level' },
-    { id: 'tilt', title: 'Tilt (Phase 1)' },
+    { id: 'listenTilt', title: 'Listening & tilt' },
     { id: 'loudness', title: 'Loudness match' },
     { id: 'sweep', title: 'Resonance sweep' },
     { id: 'peq', title: 'Parametric EQ' },
     { id: 'wrapup', title: 'Check & wrap-up' },
   ]
 
-  let wizardStep = $state<WizardStepId>('audio')
+  let wizardStep = $state<WizardStepId>('listenTilt')
 
   function wizardStepIndex(): number {
     return WIZARD_STEPS.findIndex((s) => s.id === wizardStep)
@@ -129,7 +127,7 @@
   function syncEngine() {
     if (engine.getContextState() === 'suspended') return
     engine.applyCanonicalEq(eq)
-    engine.setUserMasterFromCanonical(eq.userMasterGainDb)
+    engine.setUserMasterFromCanonical(0)
     engine.applyLoudnessCal(loudnessCalPayload())
   }
 
@@ -145,7 +143,6 @@
 
   function syncFromEngine() {
     contextLabel = engine.getContextState()
-    levelLocked = engine.isLevelLocked()
     pinkPlaying = engine.isPinkAudible()
     if (contextLabel !== 'suspended') {
       plotSampleRate = engine.getSampleRate()
@@ -156,7 +153,7 @@
     errorMessage = null
     try {
       await engine.ensureReady()
-      engine.setMasterGainDb(eq.userMasterGainDb)
+      engine.setMasterGainDb(0)
       syncEngine()
       engine.setPinkAudible(pinkPlaying)
       syncFromEngine()
@@ -165,29 +162,14 @@
     }
   }
 
-  function togglePink() {
+  async function togglePink() {
+    await initAudio()
+    syncFromEngine()
     if (sweepPlayingUi) stopUserSweep()
     pinkPlaying = !pinkPlaying
     if (pinkPlaying) calPlaying = false
     engine.setPinkAudible(pinkPlaying)
     pushLoudnessCalOnly()
-    syncFromEngine()
-  }
-
-  function onMasterInput(e: Event) {
-    const v = Number((e.target as HTMLInputElement).value)
-    setEq({ ...eq, userMasterGainDb: v })
-    engine.setMasterGainDb(v)
-    syncFromEngine()
-  }
-
-  function lockLevel() {
-    engine.lockLevel()
-    syncFromEngine()
-  }
-
-  function unlockLevel() {
-    engine.unlockLevel()
     syncFromEngine()
   }
 
@@ -243,7 +225,9 @@
     syncFromEngine()
   }
 
-  function replaySweep() {
+  async function replaySweep() {
+    await initAudio()
+    syncFromEngine()
     if (contextLabel === 'suspended') return
     sweepMessage = null
     calPlaying = false
@@ -320,7 +304,9 @@
     })
   }
 
-  function toggleCalPlay() {
+  async function toggleCalPlay() {
+    await initAudio()
+    syncFromEngine()
     calPlaying = !calPlaying
     if (!calPlaying) comparisonLoopOn = false
     if (calPlaying) {
@@ -366,9 +352,11 @@
     sweepDurationSec = sec
   }
 
-  function onSweepSliderInput(e: Event) {
+  async function onSweepSliderInput(e: Event) {
     const t = Number((e.currentTarget as HTMLInputElement).value)
     sweepNormT = t
+    await initAudio()
+    syncFromEngine()
     if (contextLabel === 'suspended') return
     if (sweepPlayingUi) {
       engine.seekLogSweep(t)
@@ -407,7 +395,9 @@
     }
   }
 
-  function toggleMusic() {
+  async function toggleMusic() {
+    await initAudio()
+    syncFromEngine()
     if (contextLabel === 'suspended') return
     musicPlaying = !musicPlaying
     engine.setMusicAudible(musicPlaying)
@@ -462,8 +452,6 @@
       try {
         const text = String(reader.result ?? '')
         const parsed = parseCanonicalEqJson(text)
-        engine.unlockLevel()
-        levelLocked = false
         eq = withAutoPreamp(parsed)
         calPlaying = false
         clearSweepUiTimer()
@@ -477,7 +465,7 @@
         musicLoadedOk = false
         musicStatus = null
         syncEngine()
-        engine.setMasterGainDb(eq.userMasterGainDb)
+        engine.setMasterGainDb(0)
         importMessage = 'Profile imported.'
       } catch (err) {
         importMessage =
@@ -553,6 +541,19 @@
     return () => cancelAnimationFrame(rafId)
   })
 
+  onMount(() => {
+    const onFirstPointer = () => {
+      void initAudio().then(() => {
+        syncFromEngine()
+        if (engine.getContextState() === 'running') {
+          window.removeEventListener('pointerdown', onFirstPointer, true)
+        }
+      })
+    }
+    window.addEventListener('pointerdown', onFirstPointer, true)
+    return () => window.removeEventListener('pointerdown', onFirstPointer, true)
+  })
+
   onDestroy(() => {
     clearSweepUiTimer()
     engine.dispose()
@@ -563,9 +564,9 @@
   <header class="header">
     <h1>Self-EQ</h1>
     <p class="lede">
-      Step through <strong>tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong> (5–12 kHz),
-      and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay visible on the
-      right (or above on small screens).
+      Step through <strong>listening & tilt</strong>, <strong>loudness matching</strong>, <strong>treble sweep</strong>
+      (5–12 kHz), and <strong>parametric</strong> bands. The <strong>target curve</strong> and profile export stay
+      visible on the right (or above on small screens). <strong>First tap or click</strong> anywhere unlocks audio.
     </p>
   </header>
 
@@ -590,13 +591,14 @@
 
   <div class="app-grid">
     <div class="step-main">
-  {#if wizardStep === 'audio'}
-  <section class="panel" aria-labelledby="audio-eng-heading">
-    <h2 id="audio-eng-heading">Audio engine</h2>
+  {#if wizardStep === 'listenTilt'}
+  <section class="panel" aria-labelledby="phase1-heading">
+    <h2 id="phase1-heading">Listening setup & spectral tilt</h2>
     <p class="hint">
-      Browsers require a click to start audio. Set <strong>your device / system volume</strong> to a comfortable
-      level once and keep it there for the whole session. <strong>Preamp</strong> is computed from band gains
-      (negative of the largest boost) to reduce clipping.
+      <strong>First tap or click</strong> anywhere on the page starts the audio engine (browser requirement). Set
+      <strong>your device / system volume</strong> to a comfortable level once and keep it there for the whole session.
+      <strong>Preamp</strong> follows the combined EQ curve so boosts (including overlapping filters) are less likely to
+      clip.
     </p>
 
     {#if errorMessage}
@@ -604,8 +606,7 @@
     {/if}
 
     <div class="actions">
-      <button type="button" class="primary" onclick={initAudio}>Start audio</button>
-      <button type="button" onclick={togglePink} disabled={contextLabel === 'suspended'}>
+      <button type="button" class="primary" onclick={() => void togglePink()}>
         {pinkPlaying ? 'Stop pink noise' : 'Play pink noise'}
       </button>
     </div>
@@ -617,47 +618,11 @@
       {/if}
     </p>
 
-    <details class="advanced-audio">
-      <summary>Advanced — in-app level trim & lock</summary>
-      <p class="hint advanced-hint">
-        Prefer hardware volume above. Use this only if the signal is too quiet or you need a fixed trim for
-        accessibility. <strong>Lock</strong> freezes this trim during loudness matching.
-      </p>
-      <div class="control">
-        <label for="master-gain">In-app trim (dB)</label>
-        <input
-          id="master-gain"
-          type="range"
-          min="-24"
-          max="12"
-          step="0.5"
-          value={eq.userMasterGainDb}
-          disabled={levelLocked}
-          oninput={onMasterInput}
-        />
-        <span class="value">{eq.userMasterGainDb.toFixed(1)} dB</span>
-      </div>
-      <div class="lock-row">
-        {#if !levelLocked}
-          <button type="button" onclick={lockLevel} disabled={contextLabel === 'suspended'}>
-            Lock trim for calibration
-          </button>
-        {:else}
-          <button type="button" class="warn" onclick={unlockLevel}>Unlock trim</button>
-          <span class="locked-note">In-app trim is locked.</span>
-        {/if}
-      </div>
-    </details>
-  </section>
-  {/if}
-  {#if wizardStep === 'tilt'}
-  <section class="panel" aria-labelledby="phase1-heading">
-    <h2 id="phase1-heading">Phase 1 — Spectral tilt (pink noise)</h2>
-    <p class="hint">
-      Adjust until pink noise sounds like a balanced “waterfall” — not too dark, not too piercing. Tilt uses a
-      low-Q <strong>lowshelf</strong> and <strong>highshelf</strong> both at {TILT_PIVOT_HZ} Hz (half the tilt
-      value each) ahead of your parametric bands. Use <strong>Bypass EQ</strong> to compare flat playback at
-      the same listening level (device volume).
+    <p class="hint tilt-hint-after-pink">
+      Adjust until pink noise sounds like a balanced “waterfall” — not too dark, not too piercing. Tilt uses a low-Q
+      <strong>lowshelf</strong> and <strong>highshelf</strong> both at {TILT_PIVOT_HZ} Hz (half the tilt value each)
+      ahead of your parametric bands. Use <strong>Bypass EQ</strong> to compare flat playback at the same device
+      volume.
     </p>
     <div class="control">
       <label for="tilt">Tilt (dB)</label>
@@ -679,7 +644,7 @@
     </p>
     <label class="bypass-label">
       <input type="checkbox" checked={eq.eqBypass} onchange={() => toggleBypass()} />
-      Bypass EQ (flat pink at master gain)
+      Bypass EQ (flat pink at unity gain after preamp)
     </label>
   </section>
   {/if}
@@ -695,7 +660,7 @@
     <div class="actions">
       <button
         type="button"
-        onclick={toggleCalPlay}
+        onclick={() => void toggleCalPlay()}
         disabled={contextLabel === 'suspended' || sweepPlayingUi}
       >
         {calPlaying ? 'Stop calibration tone' : 'Play calibration tone'}
@@ -716,37 +681,6 @@
         <option value="narrow">Narrow (legacy)</option>
       </select>
     </label>
-    <div class="comparison-loop">
-      <label class="checkbox-row">
-        <input
-          type="checkbox"
-          checked={comparisonLoopOn}
-          disabled={!calPlaying}
-          onchange={(e) => {
-            comparisonLoopOn = (e.currentTarget as HTMLInputElement).checked
-          }}
-        />
-        Comparison loop — alternate reference / test every
-        <input
-          type="number"
-          class="seg-input"
-          min="0.5"
-          max="5"
-          step="0.25"
-          value={comparisonSegmentSec}
-          disabled={!calPlaying}
-          oninput={(e) => {
-            const v = Number((e.currentTarget as HTMLInputElement).value)
-            if (Number.isFinite(v)) comparisonSegmentSec = Math.min(5, Math.max(0.5, v))
-          }}
-        />
-        s
-      </label>
-      <p class="hint loop-hint">
-        While on, alternates <strong>reference</strong> and <strong>test</strong> for the same length each (the number
-        of seconds above). You can still pick the test band below; the loop overrides Reference / Test while it runs.
-      </p>
-    </div>
     <fieldset class="cal-route">
       <legend>Route {comparisonLoopOn ? '(overridden while loop is on)' : ''}</legend>
       <label class="radio-row">
@@ -796,6 +730,37 @@
       </div>
       <button type="button" class="small reset-band" onclick={resetLoudnessBand}>Reset this band</button>
     {/if}
+    <div class="comparison-loop">
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          checked={comparisonLoopOn}
+          disabled={!calPlaying}
+          onchange={(e) => {
+            comparisonLoopOn = (e.currentTarget as HTMLInputElement).checked
+          }}
+        />
+        Comparison loop — alternate reference / test every
+        <input
+          type="number"
+          class="seg-input"
+          min="0.5"
+          max="5"
+          step="0.25"
+          value={comparisonSegmentSec}
+          disabled={!calPlaying}
+          oninput={(e) => {
+            const v = Number((e.currentTarget as HTMLInputElement).value)
+            if (Number.isFinite(v)) comparisonSegmentSec = Math.min(5, Math.max(0.5, v))
+          }}
+        />
+        s
+      </label>
+      <p class="hint loop-hint">
+        While on, alternates <strong>reference</strong> and <strong>test</strong> for the same length each (the number
+        of seconds above). You can still pick the test band above; the loop overrides Reference / Test while it runs.
+      </p>
+    </div>
   </section>
   {/if}
   {#if wizardStep === 'sweep'}
@@ -831,7 +796,6 @@
         max="1"
         step="0.001"
         value={sweepNormT}
-        disabled={contextLabel === 'suspended'}
         onpointerdown={onSweepSliderPointerDown}
         onpointerup={onSweepSliderPointerUp}
         oninput={onSweepSliderInput}
@@ -841,7 +805,7 @@
       >
     </div>
     <div class="actions">
-      <button type="button" onclick={replaySweep} disabled={contextLabel === 'suspended' || calPlaying}>
+      <button type="button" onclick={() => void replaySweep()} disabled={contextLabel === 'suspended' || calPlaying}>
         {sweepPlayingUi ? 'Replay sweep' : 'Play / replay sweep'}
       </button>
       <button
@@ -993,12 +957,13 @@
   <section class="panel" aria-labelledby="wrapup-heading">
     <h2 id="wrapup-heading">Check & wrap-up</h2>
     <p class="hint">
-      Optional: load a track you know well and A/B with <strong>Bypass EQ</strong> (Tilt step) at a fixed device volume.
+      Optional: load a track you know well and A/B with <strong>Bypass EQ</strong> (Listening & tilt step) at a fixed
+      device volume.
       Then save your profile from the panel on the right.
     </p>
     <h3 class="subheading-small" id="music-heading">Reference music</h3>
     <div class="actions">
-      <button type="button" onclick={() => musicFileInput?.click()} disabled={contextLabel === 'suspended'}>
+      <button type="button" onclick={() => musicFileInput?.click()}>
         Load audio file…
       </button>
       <input
@@ -1008,7 +973,7 @@
         class="sr-only"
         onchange={onMusicFile}
       />
-      <button type="button" onclick={toggleMusic} disabled={contextLabel === 'suspended' || !musicLoadedOk}>
+      <button type="button" onclick={() => void toggleMusic()} disabled={contextLabel === 'suspended' || !musicLoadedOk}>
         {musicPlaying ? 'Stop music' : 'Play music'}
       </button>
       <button type="button" class="small danger" onclick={clearLoadedMusic} disabled={!musicLoadedOk}>Clear file</button>
@@ -1290,11 +1255,6 @@
     border-color: var(--accent-border);
   }
 
-  button.warn {
-    border-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.12);
-  }
-
   button.small {
     padding: 0.25rem 0.5rem;
     font-size: 0.85rem;
@@ -1468,17 +1428,8 @@
     text-align: right;
   }
 
-  .lock-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin-top: 0.25rem;
-  }
-
-  .locked-note {
-    font-size: 0.85rem;
-    color: var(--text);
+  .tilt-hint-after-pink {
+    margin-top: 1.1rem;
   }
 
   .band-list {
@@ -1566,25 +1517,6 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-  }
-
-  .advanced-audio {
-    margin-top: 1rem;
-    padding: 0.65rem 0.85rem;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-    font-size: 0.9rem;
-  }
-
-  .advanced-audio summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text-h);
-  }
-
-  .advanced-hint {
-    margin-top: 0.65rem;
-    font-size: 0.85rem;
   }
 
   .sweep-duration-row {

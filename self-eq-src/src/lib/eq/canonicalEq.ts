@@ -35,7 +35,7 @@ export type EqMeta = {
 
 /**
  * - `preampDb`: headroom trim (typically ≤ 0), maps to Peace `Preamp:` / first digital gain.
- * - `userMasterGainDb`: listening level in the preview app (separate from export preamp).
+ * - `userMasterGainDb`: kept in JSON for compatibility; preview always uses 0 (system volume only).
  */
 /** Pivot frequency for Phase 1 spectral tilt (paired shelves). */
 export const TILT_PIVOT_HZ = 1000
@@ -149,7 +149,7 @@ export function withAutoPreamp(eq: CanonicalEq): CanonicalEq {
   for (const f of LOUDNESS_TEST_FREQS) {
     loudnessMatchDb[f] = Math.min(0, loudnessMatchDb[f])
   }
-  const patched = { ...eq, loudnessMatchDb }
+  const patched = { ...eq, loudnessMatchDb, userMasterGainDb: 0 }
   return { ...patched, preampDb: preampDbFromCascadePeak(patched) }
 }
 
