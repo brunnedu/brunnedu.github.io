@@ -62,3 +62,6 @@ build/
 
 # Dev notes and implementation plans
 dev/
+
+# Local WhatsApp exports (never commit real chats)
+whats-stats/data/
