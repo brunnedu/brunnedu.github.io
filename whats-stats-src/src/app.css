@@ -16,7 +16,8 @@
   /* After body fonts: color emoji fallbacks (WhatsApp-style = OS-native on each platform). */
   --font-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', 'Noto Emoji',
     'EmojiOne Color', 'Android Emoji', sans-serif;
-  --max: 880px;
+  /* Match main site .container (styles.css) and ~self-eq .shell width scale */
+  --max: 1200px;
 }
 
 *,
@@ -57,8 +58,8 @@ body {
 
 .site-header {
   text-align: center;
-  padding: calc(1.25rem + env(safe-area-inset-top, 0)) max(1rem, env(safe-area-inset-right, 0)) 1.5rem
-    max(1rem, env(safe-area-inset-left, 0));
+  padding: calc(1.25rem + env(safe-area-inset-top, 0)) max(2rem, env(safe-area-inset-right, 0)) 1.5rem
+    max(2rem, env(safe-area-inset-left, 0));
   background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
   border-bottom: 1px solid var(--border);
 }
@@ -149,8 +150,8 @@ body {
 .site-main {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 1.5rem max(1rem, env(safe-area-inset-left, 0)) max(2.5rem, env(safe-area-inset-bottom, 0))
-    max(1rem, env(safe-area-inset-right, 0));
+  padding: 1.5rem max(2rem, env(safe-area-inset-left, 0)) max(2.5rem, env(safe-area-inset-bottom, 0))
+    max(2rem, env(safe-area-inset-right, 0));
 }
 
 .card {
@@ -160,6 +161,13 @@ body {
   box-shadow: var(--shadow);
   padding: 1.25rem 1.35rem;
   margin-bottom: 1.5rem;
+}
+
+.instructions-card {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
 .instructions-card .details {
@@ -200,7 +208,7 @@ body {
 }
 
 .tab {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 44px;
   padding: 0.5rem 1rem;
   border: 2px solid var(--border);
@@ -250,9 +258,14 @@ body {
 
 .upload-section {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
 }
 
 .upload-card {
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--accent-soft);
   border: 2px dashed var(--accent);
   border-radius: var(--radius);
@@ -326,7 +339,7 @@ body {
 
 .upload-hint {
   margin: 0.5rem auto 0;
-  max-width: 28rem;
+  max-width: min(28rem, 100%);
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.45;
@@ -562,6 +575,13 @@ body {
 
   .tagline-privacy {
     font-size: 0.86rem;
+  }
+}
+
+/* Extra right gutter for charts: narrow phones, or landscape mobile (often >600px wide) */
+@media (max-width: 600px), ((orientation: landscape) and (max-height: 520px) and (max-width: 960px)) {
+  .viz-section {
+    padding-inline-end: 1.5rem;
   }
 }
 
