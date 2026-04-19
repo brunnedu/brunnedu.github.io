@@ -50,6 +50,7 @@ poetry.lock
 .eggs/
 dist/
 build/
+node_modules/
 
 # JetBrains IDE files (e.g., PyCharm)
 .idea/
