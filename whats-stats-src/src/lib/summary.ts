@@ -1,8 +1,7 @@
-import { formatDuration } from './utils';
 import { countWordOccurrences, countEmojiOccurrences, getTopTfidfWordsPerParticipant } from './analysis';
 import type { ChatMessage, ParticipantStat } from './types';
 
-export type SummaryCard = { label: string; value: string };
+export type SummaryCard = { label: string; value: string; hint?: string };
 
 export function getSummaryCards(messages: ChatMessage[]): SummaryCard[] {
   const totalMessages = messages.length;
@@ -59,7 +58,19 @@ export function buildParticipantStats(messages: ChatMessage[]): ParticipantStat[
   const emojiCountsByUser = countEmojiOccurrences(messages, {
     byParticipant: true,
   }) as Record<string, Record<string, number>>;
-  const uniqueWordsByUser = getTopTfidfWordsPerParticipant(messages, { topN: 5, skipEmojis: true });
+  const uniqueWordsByUser = getTopTfidfWordsPerParticipant(messages, {
+    topN: 5,
+    skipEmojis: true,
+    ngram: 1,
+  });
+  const uniqueBigramsByUser = getTopTfidfWordsPerParticipant(messages, {
+    topN: 5,
+    skipEmojis: true,
+    ngram: 2,
+  });
+
+  const mediaLineRe = /<Media omitted>/gi;
+  const linkRe = /https?:\/\/[^\s<>]+|www\.[^\s<>]+/gi;
 
   const participantStats: ParticipantStat[] = participants.map((user) => {
     const userMsgs = messages.filter((m) => m.user === user);
@@ -71,8 +82,16 @@ export function buildParticipantStats(messages: ChatMessage[]): ParticipantStat[
     const emojiCounts = emojiCountsByUser[user] || {};
     const topEmojis = Object.entries(emojiCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .slice(0, 7)
       .map(([emoji]) => emoji);
+    const totalEmojiUses = Object.values(emojiCounts).reduce((s, n) => s + n, 0);
+    const emojiFrequency =
+      numMessages === 0 ? '—' : `${(totalEmojiUses / numMessages).toFixed(2)} / msg`;
+    const emojiFrequencyDetail =
+      numMessages === 0
+        ? ''
+        : `${totalEmojiUses} emoji uses ÷ ${numMessages} messages (same counting as Top emojis)`;
+
     let longestMsgText = '';
     let longestMsgLen = 0;
     userMsgs.forEach((m) => {
@@ -88,6 +107,28 @@ export function buildParticipantStats(messages: ChatMessage[]): ParticipantStat[
       .slice(0, 5)
       .map(([word, count]) => ({ word, count }));
     const topUniqueWords = uniqueWordsByUser[user] || [];
+    const topUniqueBigrams = uniqueBigramsByUser[user] || [];
+
+    let nightOwlCount = 0;
+    let mediaCount = 0;
+    let linkCount = 0;
+    userMsgs.forEach((m) => {
+      const hour = new Date(m.timestamp).getHours();
+      if (hour >= 23 || hour < 5) nightOwlCount += 1;
+      const mediaHits = m.message.match(mediaLineRe);
+      if (mediaHits) mediaCount += mediaHits.length;
+      const linkHits = m.message.match(linkRe);
+      if (linkHits) linkCount += linkHits.length;
+    });
+    const nightOwlScore =
+      numMessages === 0
+        ? '—'
+        : `${((nightOwlCount / numMessages) * 100).toFixed(1)}%`;
+    const nightOwlDetail =
+      numMessages === 0
+        ? ''
+        : `${nightOwlCount} of ${numMessages} messages between 11pm–5am (local time)`;
+
     let longestGap = 0;
     let gapStart: Date | null = null;
     let gapEnd: Date | null = null;
@@ -126,8 +167,15 @@ export function buildParticipantStats(messages: ChatMessage[]): ParticipantStat[
       nUniqueWords,
       topEmojis,
       emojiCounts,
+      emojiFrequency,
+      emojiFrequencyDetail,
       topWords,
       topUniqueWords,
+      topUniqueBigrams,
+      nightOwlScore,
+      nightOwlDetail,
+      mediaCount,
+      linkCount,
       longestGap,
       gapStart,
       gapEnd,

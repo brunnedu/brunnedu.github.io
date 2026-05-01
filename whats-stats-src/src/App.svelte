@@ -10,6 +10,7 @@
   import { renderEmojiChart, renderEmojiTrends } from '$lib/visualizations/emoji';
   import { renderMostUsedWords, renderWordCloud } from '$lib/visualizations/words';
   import { renderHourlyActivity, renderLongestStreaks } from '$lib/visualizations/participant';
+  import { renderWhoFollowsWhomHeatmap } from '$lib/visualizations/followHeatmap';
   import { renderMessageLengthHistogram } from '$lib/visualizations/misc';
   import type { ChatMessage } from '$lib/types';
   import { tooltip } from '$lib/actions/tooltip';
@@ -238,7 +239,7 @@
         {#each summaryCards as c}
           <div class="summary-cell">
             <span class="summary-label">{c.label}</span>
-            <span class="summary-value">{c.value}</span>
+            <span class="summary-value" use:tooltip={c.hint}>{c.value}</span>
           </div>
         {/each}
       </div>
@@ -252,12 +253,12 @@
             <h3 class="participant-name">{stat.user}</h3>
             <dl class="stat-dl">
               <div><dt>Messages</dt><dd>{stat.numMessages}</dd></div>
-              <div><dt>Avg. length</dt><dd>{stat.avgMsgLen} chars</dd></div>
               <div>
-                <dt>Longest message</dt>
-                <dd use:tooltip={stat.longestMsgText || undefined}>{stat.longestMsgLen} chars</dd>
+                <dt>Last message</dt>
+                <dd use:tooltip={stat.lastMsgTime?.toLocaleString() ?? undefined}
+                  >{stat.lastMsgTime ? stat.lastMsgTime.toLocaleDateString() : '—'}</dd
+                >
               </div>
-              <div><dt>Unique words</dt><dd>{stat.nUniqueWords}</dd></div>
               <div>
                 <dt>Longest gap</dt>
                 <dd use:tooltip={stat.longestGap ? gapTitle(stat) : undefined}
@@ -265,10 +266,22 @@
                 >
               </div>
               <div>
-                <dt>Last message</dt>
-                <dd use:tooltip={stat.lastMsgTime?.toLocaleString() ?? undefined}
-                  >{stat.lastMsgTime ? stat.lastMsgTime.toLocaleDateString() : '—'}</dd
-                >
+                <dt>Night owl</dt>
+                <dd use:tooltip={stat.nightOwlDetail || undefined}>{stat.nightOwlScore}</dd>
+              </div>
+              <div><dt>Avg. length</dt><dd>{stat.avgMsgLen} chars</dd></div>
+              <div>
+                <dt>Longest message</dt>
+                <dd use:tooltip={stat.longestMsgText || undefined}>{stat.longestMsgLen} chars</dd>
+              </div>
+              <div><dt>Unique words</dt><dd>{stat.nUniqueWords}</dd></div>
+              <div>
+                <dt>Emoji frequency</dt>
+                <dd use:tooltip={stat.emojiFrequencyDetail || undefined}>{stat.emojiFrequency}</dd>
+              </div>
+              <div>
+                <dt>Media · links</dt>
+                <dd>{stat.mediaCount} · {stat.linkCount}</dd>
               </div>
             </dl>
             <p class="mini-heading">Top emojis</p>
@@ -281,7 +294,7 @@
                 <span class="muted">—</span>
               {/each}
             </div>
-            <p class="mini-heading">Top words</p>
+            <p class="mini-heading">Most used words</p>
             <div class="word-row">
               {#each stat.topWords as w}
                 <span class="word-chip" use:tooltip={`${w.word}: ${w.count} uses`}>{w.word}</span>
@@ -289,9 +302,20 @@
                 <span class="muted">—</span>
               {/each}
             </div>
-            <p class="mini-heading">Distinctive words (TF‑IDF)</p>
+            <p class="mini-heading">Most used unique words</p>
             <div class="word-row">
               {#each stat.topUniqueWords as w}
+                <span
+                  class="word-chip"
+                  use:tooltip={`${w.word} (${w.count} uses, TF-IDF: ${w.score.toFixed(3)})`}>{w.word}</span
+                >
+              {:else}
+                <span class="muted">—</span>
+              {/each}
+            </div>
+            <p class="mini-heading">Most used unique 2-grams</p>
+            <div class="word-row">
+              {#each stat.topUniqueBigrams as w}
                 <span
                   class="word-chip"
                   use:tooltip={`${w.word} (${w.count} uses, TF-IDF: ${w.score.toFixed(3)})`}>{w.word}</span
@@ -350,6 +374,9 @@
       </div>
       <div class="viz-card">
         <PlotlyViz messages={messages} render={renderHourlyActivity} viewport={viewport} />
+      </div>
+      <div class="viz-card">
+        <PlotlyViz messages={messages} render={renderWhoFollowsWhomHeatmap} viewport={viewport} />
       </div>
     </section>
   {/if}

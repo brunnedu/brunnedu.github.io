@@ -15,8 +15,16 @@ export type ParticipantStat = {
   nUniqueWords: number;
   topEmojis: string[];
   emojiCounts: Record<string, number>;
+  /** Emojis per message (uses ÷ messages). */
+  emojiFrequency: string;
+  emojiFrequencyDetail: string;
   topWords: { word: string; count: number }[];
   topUniqueWords: WordStat[];
+  topUniqueBigrams: WordStat[];
+  nightOwlScore: string;
+  nightOwlDetail: string;
+  mediaCount: number;
+  linkCount: number;
   longestGap: number;
   gapStart: Date | null;
   gapEnd: Date | null;

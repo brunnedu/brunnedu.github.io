@@ -109,10 +109,15 @@ export function countEmojiOccurrences(
 
 export function getTopTfidfWordsPerParticipant(
   messages: ChatMessage[],
-  { topN = 10, skipEmojis = true }: { topN?: number; skipEmojis?: boolean } = {}
+  {
+    topN = 10,
+    skipEmojis = true,
+    ngram = 1,
+  }: { topN?: number; skipEmojis?: boolean; ngram?: number } = {}
 ): Record<string, { word: string; score: number; count: number }[]> {
   const userWordCounts = countWordOccurrences(messages, {
     byParticipant: true,
+    ngram,
     skipEmojis,
   }) as Record<string, Record<string, number>>;
 
