@@ -207,8 +207,16 @@ body {
 }
 
 .chevron {
+  display: inline-block;
   font-size: 0.75rem;
   opacity: 0.7;
+  /* ▼ glyph: closed → point left; open → point down */
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+.details[open] > .details-summary .chevron {
+  transform: rotate(0deg);
 }
 
 .tabs {
@@ -298,12 +306,6 @@ body {
   justify-content: center;
   gap: 0.75rem 1rem;
   margin-bottom: 0.75rem;
-}
-
-.or {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  font-weight: 500;
 }
 
 .btn-primary,

@@ -217,7 +217,6 @@
           <button type="button" class="btn-secondary" disabled={busy} onclick={onSample}>
             Try sample chat
           </button>
-          <span class="or">or</span>
           <button type="button" class="btn-primary" disabled={busy} onclick={() => fileInput?.click()}>
             Upload your chat
           </button>
