@@ -125,8 +125,8 @@
       >
     </p>
     <p class="tagline-privacy">
-      Everything runs in your browser.<br />
-      Nothing is uploaded to a server.
+      Your chat stays on your device.<br />
+      Nothing is sent or stored anywhere.
     </p>
   </div>
 </header>
